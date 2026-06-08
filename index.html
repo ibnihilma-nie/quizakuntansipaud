@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Akuntansi PAUD: Pemburu Aset Kas</title>
+    <!-- Tailwind CSS untuk Styling Modern -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Lucu & Menarik -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+        }
+        .title-font {
+            font-family: 'Fredoka One', cursive;
+        }
+        /* Custom scrollbar untuk pembungkus kuis */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 min-h-screen flex flex-col items-center justify-between p-2 sm:p-4 select-none">
+
+    <!-- HEADER STATUS GAME -->
+    <header class="w-full max-w-4xl bg-white/80 backdrop-blur-md rounded-2xl p-4 shadow-lg border-2 border-purple-200 flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div class="flex items-center gap-3">
+            <span class="text-3xl">🏫</span>
+            <div>
+                <h1 class="title-font text-lg sm:text-2xl text-purple-700 tracking-wide leading-none">PAUD Edu-Kas</h1>
+                <p class="text-xs sm:text-sm text-gray-500 font-bold">Simulator Akuntansi Labirin</p>
+            </div>
+        </div>
+        
+        <!-- Stats Panel -->
+        <div class="flex items-center gap-4 flex-wrap">
+            <div class="bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-xl text-center">
+                <span class="text-xs text-emerald-800 font-bold block">SALDO KAS (SKOR)</span>
+                <span id="score-val" class="font-bold text-sm sm:text-base text-emerald-700">Rp0</span>
+            </div>
+            <div class="bg-rose-100 border border-rose-300 px-3 py-1.5 rounded-xl text-center">
+                <span class="text-xs text-rose-800 font-bold block">NYAWA</span>
+                <span id="lives-val" class="font-bold text-sm sm:text-base text-rose-700">❤️❤️❤️</span>
+            </div>
+            <div class="bg-purple-100 border border-purple-300 px-3 py-1.5 rounded-xl text-center">
+                <span class="text-xs text-purple-800 font-bold block">KAS TERKUMPUL</span>
+                <span id="progress-val" class="font-bold text-sm sm:text-base text-purple-700">0 / 12</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- AREA UTAMA PERMAINAN -->
+    <main class="w-full max-w-4xl flex-grow flex flex-col lg:flex-row items-center justify-center gap-4">
+        
+        <!-- SCREEN UTAMA (CANVAS GAME) -->
+        <div class="relative w-full aspect-square max-w-[480px] bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border-4 border-purple-400 flex items-center justify-center">
+            <canvas id="gameCanvas" class="w-full h-full block bg-slate-950"></canvas>
+
+            <!-- OVERLAY: START SCREEN -->
+            <div id="start-overlay" class="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center p-6 text-center z-20">
+                <span class="text-6xl mb-3 animate-bounce">🧑‍🏫</span>
+                <h2 class="title-font text-2xl sm:text-3xl text-yellow-400 mb-2">Petualangan Akuntansi PAUD</h2>
+                <p class="text-slate-300 text-sm max-w-md mb-6 leading-relaxed">
+                    Bantu Ibu Guru mengumpulkan <span class="text-blue-400 font-bold">12 Buku Kas Aset (📘)</span> di labirin sekolah. Hindari monster <span class="text-red-400 font-bold">Defisit Keuangan (📉)</span>! Setiap buku berisi kuis akuntansi penting.
+                </p>
+                <button id="btn-start" class="title-font bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-900 px-8 py-3 rounded-xl shadow-lg shadow-yellow-500/30 transform transition active:scale-95 text-lg">
+                    MULAI PETUALANGAN
+                </button>
+            </div>
+
+            <!-- OVERLAY: GAME OVER SCREEN -->
+            <div id="gameover-overlay" class="absolute inset-0 bg-slate-950/95 hidden flex flex-col items-center justify-center p-6 text-center z-20">
+                <span class="text-6xl mb-3">📉</span>
+                <h2 class="title-font text-3xl text-red-500 mb-2">Kas Mengalami Defisit!</h2>
+                <p class="text-slate-300 text-sm max-w-md mb-4 leading-relaxed">
+                    Sayang sekali, Anda terlalu sering menabrak kendala keuangan atau salah menjawab tantangan akuntansi. Jangan menyerah!
+                </p>
+                <div class="bg-slate-800 p-3 rounded-lg mb-6 border border-slate-700">
+                    <p class="text-xs text-slate-400">Pencapaian Saldo Akhir:</p>
+                    <p id="gameover-final-score" class="text-xl font-bold text-red-400">Rp0</p>
+                </div>
+                <button onclick="resetGame()" class="title-font bg-rose-500 hover:bg-rose-400 text-white px-8 py-3 rounded-xl shadow-lg transform transition active:scale-95 text-lg">
+                    COBA LAGI
+                </button>
+            </div>
+
+            <!-- OVERLAY: VICTORY SCREEN -->
+            <div id="victory-overlay" class="absolute inset-0 bg-slate-950/95 hidden flex flex-col items-center justify-center p-6 text-center z-20">
+                <span class="text-6xl mb-3">🏆</span>
+                <h2 class="title-font text-3xl text-yellow-400 mb-2">Sukses Audit & Surplus!</h2>
+                <p class="text-slate-300 text-sm max-w-md mb-4 leading-relaxed">
+                    Selamat! Anda berhasil mengelola akuntansi lembaga PAUD dengan sangat transparan dan akuntabel! Semua aset telah dibukukan dengan benar.
+                </p>
+                <div class="bg-slate-800 px-6 py-4 rounded-xl mb-6 border border-yellow-500/30">
+                    <p class="text-xs text-slate-400">Total Saldo Kas Terselamatkan:</p>
+                    <p id="victory-final-score" class="text-2xl font-bold text-emerald-400">Rp0</p>
+                    <p id="victory-accuracy" class="text-xs text-slate-300 mt-2">Akurasi Jawaban: 0%</p>
+                </div>
+                <button onclick="resetGame()" class="title-font bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-3 rounded-xl shadow-lg transform transition active:scale-95 text-lg">
+                    MAIN LAGI
+                </button>
+            </div>
+        </div>
+
+        <!-- INFO PANEL & KONTROL MOBILE -->
+        <div class="w-full max-w-[480px] lg:max-w-xs flex flex-col gap-4 justify-between h-full">
+            
+            <!-- PANEL PETUNJUK -->
+            <div class="bg-white/90 rounded-2xl p-4 shadow-md border-2 border-purple-100 flex-grow">
+                <h3 class="font-bold text-purple-800 mb-2 flex items-center gap-2 text-sm sm:text-base">
+                    <span>💡</span> Petunjuk Legenda:
+                </h3>
+                <ul class="text-xs sm:text-sm text-slate-600 space-y-2">
+                    <li class="flex items-center gap-2">
+                        <span class="bg-purple-100 p-1 rounded">🧑‍🏫</span> <strong>Anda (Akuntan PAUD)</strong>: Kendalikan dengan tombol arah.
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span class="bg-blue-100 p-1 rounded">📘</span> <strong>Buku Aset Keuangan</strong>: Tabrak untuk memunculkan Soal Kuis.
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span class="bg-red-100 p-1 rounded">👾</span> <strong>Hantu Defisit/Utang</strong>: Hindari! Menabrak mengurangi Kas & Nyawa.
+                    </li>
+                </ul>
+            </div>
+
+            <!-- KONTROL VIRTUAL (D-PAD) UNTUK MOBILE -->
+            <div class="bg-white/90 rounded-2xl p-4 shadow-md border-2 border-purple-100">
+                <p class="text-center text-xs text-slate-400 font-bold mb-2">KONTROL SENTUH (HP/TABLET)</p>
+                <div class="grid grid-cols-3 gap-2 max-w-[180px] mx-auto">
+                    <div></div>
+                    <button id="ctrl-up" class="bg-purple-500 active:bg-purple-700 text-white font-bold h-12 w-12 rounded-xl flex items-center justify-center shadow-md active:scale-90 transition mx-auto text-xl">▲</button>
+                    <div></div>
+                    
+                    <button id="ctrl-left" class="bg-purple-500 active:bg-purple-700 text-white font-bold h-12 w-12 rounded-xl flex items-center justify-center shadow-md active:scale-90 transition mx-auto text-xl">◀</button>
+                    <div class="flex items-center justify-center text-slate-300">🕹️</div>
+                    <button id="ctrl-right" class="bg-purple-500 active:bg-purple-700 text-white font-bold h-12 w-12 rounded-xl flex items-center justify-center shadow-md active:scale-90 transition mx-auto text-xl">▶</button>
+                    
+                    <div></div>
+                    <button id="ctrl-down" class="bg-purple-500 active:bg-purple-700 text-white font-bold h-12 w-12 rounded-xl flex items-center justify-center shadow-md active:scale-90 transition mx-auto text-xl">▼</button>
+                    <div></div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full text-center py-4 text-xs text-purple-600 font-bold">
+        © 2026 Game Akuntansi Lembaga PAUD Terintegrasi
+    </footer>
+
+    <!-- MODAL POP-UP SOAL KUIS -->
+    <div id="quiz-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden border-4 border-purple-400 transform transition-all duration-300 scale-95 opacity-0" id="quiz-container">
+            
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-4 flex justify-between items-center">
+                <span class="title-font text-lg sm:text-xl tracking-wider flex items-center gap-2">
+                    <span>📖</span> LAPORAN JURNAL PAUD
+                </span>
+                <span id="quiz-number-tag" class="bg-purple-800 text-purple-200 text-xs px-3 py-1 rounded-full font-bold">SOAL 1 dari 12</span>
+            </div>
+
+            <!-- Modal Body (Scrollable if tiny mobile screen) -->
+            <div class="p-6 max-h-[70vh] overflow-y-auto">
+                <!-- Pertanyaan -->
+                <p id="quiz-question" class="text-slate-800 font-bold text-base sm:text-lg mb-4 leading-relaxed">
+                    Pertanyaan kuis akan muncul di sini...
+                </p>
+
+                <!-- Pilihan Jawaban -->
+                <div class="space-y-3" id="quiz-options-container">
+                    <!-- Tombol pilihan akan dirender secara dinamis -->
+                </div>
+
+                <!-- Hasil & Pembahasan (Hidden by default) -->
+                <div id="quiz-feedback" class="mt-6 p-4 rounded-2xl hidden">
+                    <p id="feedback-title" class="font-bold text-lg mb-1"></p>
+                    <p id="feedback-explanation" class="text-sm leading-relaxed"></p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-slate-50 px-6 py-4 flex justify-end border-t border-slate-100">
+                <button id="btn-submit-quiz" disabled class="title-font bg-purple-600 hover:bg-purple-700 text-white disabled:bg-slate-300 disabled:cursor-not-allowed px-6 py-2.5 rounded-xl shadow transition duration-200 active:scale-95 text-sm sm:text-base">
+                    KONFIRMASI JAWABAN
+                </button>
+                <button id="btn-next-adventure" class="title-font bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2.5 rounded-xl shadow transition duration-200 active:scale-95 hidden text-sm sm:text-base">
+                    LANJUTKAN PETUALANGAN ▶
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- AUDIO SINTESIS / EFEK SUARA SEDERHANA MENGGUNAKAN WEB AUDIO API -->
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                if (type === 'coin') {
+                    // Efek suara koin / ambil buku
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+                } else if (type === 'hit') {
+                    // Efek suara tertabrak musuh
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(40, audioCtx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'correct') {
+                    // Jawaban Benar
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.3); // C6
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.45);
+                } else if (type === 'wrong') {
+                    // Jawaban Salah
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.4); // A2
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                }
+            } catch(e) {
+                console.log("Audio API error/blocked:", e);
+            }
+        }
+    </script>
+
+    <!-- SCRIPT UTAMA PERMAINAN -->
+    <script>
+        // DATA KUIS DARI USER
+        const quizData = [
+            {
+                id: 1,
+                question: "Tujuan utama akuntansi pada lembaga PAUD adalah ....",
+                options: [
+                    "A. Menentukan kurikulum pembelajaran",
+                    "B. Mengelola dan menyajikan informasi keuangan secara sistematis",
+                    "C. Menambah jumlah peserta didik",
+                    "D. Menentukan jadwal kegiatan belajar"
+                ],
+                answer: 1, // B
+                explanation: "Tujuan utama akuntansi dalam organisasi non-profit maupun PAUD adalah menyajikan informasi keuangan yang teratur, transparan, dan sistematis bagi pengambil keputusan."
+            },
+            {
+                id: 2,
+                question: "Salah satu manfaat akuntansi bagi lembaga PAUD adalah ....",
+                options: [
+                    "A. Mengurangi jumlah tenaga pendidik",
+                    "B. Mempermudah pengelolaan dan pengawasan keuangan",
+                    "C. Menentukan metode pembelajaran anak",
+                    "D. Menambah jam operasional sekolah"
+                ],
+                answer: 1, // B
+                explanation: "Dengan akuntansi terstandar, pengelola dapat dengan mudah memantau arus masuk-keluar uang dan merencanakan anggaran yang sehat."
+            },
+            {
+                id: 3,
+                question: "Laporan keuangan yang menunjukkan posisi aset, kewajiban, dan modal suatu lembaga disebut ....",
+                options: [
+                    "A. Laporan Arus Kas",
+                    "B. Laporan Perubahan Modal",
+                    "C. Neraca",
+                    "D. Jurnal Umum"
+                ],
+                answer: 2, // C
+                explanation: "Neraca (Balance Sheet) menyajikan ringkasan posisi harta (aset), utang (kewajiban), dan modal bersih milik PAUD pada tanggal tertentu."
+            },
+            {
+                id: 4,
+                question: "Pencatatan seluruh transaksi keuangan secara kronologis dilakukan dalam ....",
+                options: [
+                    "A. Buku Besar",
+                    "B. Jurnal",
+                    "C. Neraca Saldo",
+                    "D. Laporan Keuangan"
+                ],
+                answer: 1, // B
+                explanation: "Jurnal adalah tempat pencatatan transaksi keuangan pertama kali secara runtut waktu (kronologis) sebelum diposting ke Buku Besar."
+            },
+            {
+                id: 5,
+                question: "Dana SPP yang diterima oleh PAUD termasuk dalam kategori ....",
+                options: [
+                    "A. Beban",
+                    "B. Utang",
+                    "C. Pendapatan",
+                    "D. Modal"
+                ],
+                answer: 2, // C
+                explanation: "Penerimaan rutin dari SPP siswa diakui langsung sebagai Pendapatan Operasional PAUD."
+            },
+            {
+                id: 6,
+                question: "Pembelian alat permainan edukatif (APE) untuk kegiatan belajar termasuk ....",
+                options: [
+                    "A. Pendapatan",
+                    "B. Pengeluaran/Beban",
+                    "C. Modal tambahan",
+                    "D. Piutang"
+                ],
+                answer: 1, // B
+                explanation: "Pembelian APE habis pakai atau penyusutan nilai APE jangka panjang dicatat sebagai beban pengeluaran operasional pendidikan."
+            },
+            {
+                id: 7,
+                question: "Analisis laporan keuangan pada PAUD bertujuan untuk ....",
+                options: [
+                    "A. Menentukan nilai rapor siswa",
+                    "B. Mengetahui kondisi dan kinerja keuangan lembaga",
+                    "C. Menambah jumlah kelas",
+                    "D. Menentukan jadwal guru"
+                ],
+                answer: 1, // B
+                explanation: "Analisis membantu yayasan atau kepala sekolah mendeteksi apakah lembaga mengalami surplus/defisit serta seberapa efisien pengeluaran dilakukan."
+            },
+            {
+                id: 8,
+                question: "Prinsip transparansi dalam akuntansi PAUD berarti ....",
+                options: [
+                    "A. Menyembunyikan data keuangan dari pihak tertentu",
+                    "B. Menyampaikan informasi keuangan secara terbuka dan dapat dipertanggungjawabkan",
+                    "C. Menghapus transaksi yang tidak penting",
+                    "D. Menambah anggaran setiap tahun"
+                ],
+                answer: 1, // B
+                explanation: "Transparansi berarti semua donasi, dana BOS/BOP, dan SPP dilaporkan apa adanya kepada komite sekolah, yayasan, maupun dinas pendidikan secara terbuka."
+            },
+            {
+                id: 9,
+                question: "Jika total pendapatan PAUD lebih besar daripada total pengeluaran, maka kondisi keuangan lembaga mengalami ....",
+                options: [
+                    "A. Defisit",
+                    "B. Kerugian",
+                    "C. Surplus",
+                    "D. Piutang"
+                ],
+                answer: 2, // C
+                explanation: "Kelebihan pendapatan atas biaya operasional dalam entitas nirlaba (seperti PAUD) diistilahkan sebagai 'Surplus', bukan laba murni."
+            },
+            {
+                id: 10,
+                question: "Berikut yang termasuk pengguna informasi laporan keuangan PAUD adalah ....",
+                options: [
+                    "A. Kepala sekolah dan yayasan",
+                    "B. Orang tua dan pihak terkait",
+                    "C. Pemerintah atau pemberi bantuan dana",
+                    "D. Semua jawaban benar"
+                ],
+                answer: 3, // D
+                explanation: "Semua pihak tersebut berkepentingan. Kepala sekolah memimpin operasional, orang tua memantau transparansi SPP, dan pemerintah memverifikasi kepatuhan dana hibah."
+            },
+            {
+                id: 11,
+                question: "Sebuah PAUD memperoleh pendapatan selama bulan Mei sebesar:\n- SPP siswa = Rp5.000.000\n- Bantuan pemerintah = Rp2.000.000\n\nSedangkan pengeluarannya:\n- Gaji guru = Rp4.000.000\n- Pembelian alat tulis = Rp500.000\n- Biaya listrik dan air = Rp300.000\n\nBerapakah surplus atau defisit yang diperoleh PAUD tersebut?",
+                options: [
+                    "A. Surplus Rp1.200.000",
+                    "B. Surplus Rp2.200.000",
+                    "C. Defisit Rp1.200.000",
+                    "D. Defisit Rp2.200.000"
+                ],
+                answer: 1, // B
+                explanation: "Total Pendapatan = Rp5.000.000 + Rp2.000.000 = Rp7.000.000.<br>Total Pengeluaran = Rp4.000.000 + Rp500.000 + Rp300.000 = Rp4.800.000.<br>Surplus = Rp7.000.000 - Rp4.800.000 = <strong>Rp2.200.000 (Surplus)</strong>."
+            },
+            {
+                id: 12,
+                question: "Pada awal bulan, kas PAUD sebesar Rp3.000.000.\nSelama bulan tersebut terjadi transaksi:\n- Menerima pembayaran SPP = Rp4.500.000\n- Membayar gaji guru = Rp2.500.000\n- Membeli alat permainan edukatif = Rp1.000.000\n\nBerapakah saldo kas akhir PAUD?",
+                options: [
+                    "A. Rp3.000.000",
+                    "B. Rp4.000.000",
+                    "C. Rp4.500.000",
+                    "D. Rp5.000.000"
+                ],
+                answer: 1, // B
+                explanation: "Saldo Awal = Rp3.000.000.<br>Penerimaan Kas (SPP) = +Rp4.500.000.<br>Pengeluaran Kas = -Rp2.500.000 (Gaji) & -Rp1.000.000 (APE).<br>Saldo Akhir = Rp3.000.000 + Rp4.500.000 - Rp2.500.000 - Rp1.000.000 = <strong>Rp4.000.000</strong>."
+            }
+        ];
+
+        // SETUP CANVAS DAN GRID LABIRIN
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Skala koordinat canvas
+        const GRID_COLS = 13;
+        const GRID_ROWS = 13;
+        let cellSize = 0; // Diatur otomatis saat resize
+
+        // Peta Labirin PAUD (1 = Tembok, 0 = Jalan)
+        // Labirin berukuran 13x13 simetris dengan jalan yang menantang
+        const originalMap = [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+            [1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1],
+            [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        ];
+
+        let currentMap = [];
+
+        // STATE GAME
+        let gameActive = false;
+        let isPaused = false;
+        let score = 0;
+        let lives = 3;
+        let questionsAnswered = 0;
+        let correctAnswersCount = 0;
+        let currentQuizIndex = null;
+
+        // Entitas Game
+        let player = { x: 1, y: 1 };
+        let books = []; // Letak Buku-Buku Kas
+        let enemies = [
+            { x: 6, y: 5, dirX: 1, dirY: 0, speedTimer: 0, icon: "👾" },
+            { x: 11, y: 11, dirX: -1, dirY: 0, speedTimer: 0, icon: "📉" },
+            { x: 6, y: 1, dirX: 0, dirY: 1, speedTimer: 0, icon: "👹" }
+        ];
+
+        // Lokasi Buku Kas yang didesain agar tersebar rata di jalan labirin
+        const bookSpawnPositions = [
+            { x: 2, y: 1 }, { x: 5, y: 1 }, { x: 11, y: 1 },
+            { x: 1, y: 3 }, { x: 7, y: 3 }, { x: 11, y: 3 },
+            { x: 3, y: 5 }, { x: 9, y: 5 },
+            { x: 3, y: 7 }, { x: 9, y: 7 },
+            { x: 5, y: 11 }, { x: 11, y: 9 }
+        ];
+
+        // KONFIGURASI DAN RESIZE
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const size = Math.min(container.clientWidth, 480);
+            canvas.width = size;
+            canvas.height = size;
+            cellSize = size / GRID_COLS;
+            draw();
+        }
+        window.addEventListener("resize", resizeCanvas);
+
+        // INISIALISASI ULANG GAME
+        function resetGame() {
+            // Setup Map
+            currentMap = JSON.parse(JSON.stringify(originalMap));
+            
+            // Atur ulang state
+            score = 0;
+            lives = 3;
+            questionsAnswered = 0;
+            correctAnswersCount = 0;
+            player = { x: 1, y: 1 };
+            
+            // Tempatkan musuh kembali
+            enemies[0] = { x: 6, y: 5, dirX: 1, dirY: 0, speedTimer: 0, icon: "👾" };
+            enemies[1] = { x: 11, y: 11, dirX: -1, dirY: 0, speedTimer: 0, icon: "📉" };
+            enemies[2] = { x: 6, y: 1, dirX: 0, dirY: 1, speedTimer: 0, icon: "👹" };
+
+            // Hubungkan setiap buku ke salah satu kuis secara terurut
+            books = [];
+            for (let i = 0; i < 12; i++) {
+                const pos = bookSpawnPositions[i];
+                books.push({
+                    x: pos.x,
+                    y: pos.y,
+                    quizIndex: i, // Urutan kuis yang dicocokkan
+                    collected: false
+                });
+            }
+
+            // Sembunyikan overlay kemenangan/kekalahan
+            document.getElementById("gameover-overlay").classList.add("hidden");
+            document.getElementById("victory-overlay").classList.add("hidden");
+            document.getElementById("start-overlay").classList.add("hidden");
+
+            updateUI();
+            
+            gameActive = true;
+            isPaused = false;
+            resizeCanvas();
+            gameLoop();
+        }
+
+        // PERBARUI ELEMEN UI HTML
+        function updateUI() {
+            // Format Rupiah sederhana
+            document.getElementById("score-val").innerText = score >= 0 ? 
+                `Rp${score.toLocaleString('id-ID')}` : 
+                `-Rp${Math.abs(score).toLocaleString('id-ID')}`;
+            
+            // Tampilan Nyawa
+            let heartString = "";
+            for (let i = 0; i < 3; i++) {
+                heartString += (i < lives) ? "❤️" : "🖤";
+            }
+            document.getElementById("lives-val").innerText = heartString;
+            document.getElementById("progress-val").innerText = `${questionsAnswered} / 12`;
+        }
+
+        // GAMBAR SEMUA ENTITAS (DRAWING)
+        function draw() {
+            if (cellSize === 0) return;
+            
+            // Bersihkan Canvas
+            ctx.fillStyle = "#0f172a"; // slate-900
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Gambar Labirin
+            for (let r = 0; r < GRID_ROWS; r++) {
+                for (let c = 0; c < GRID_COLS; c++) {
+                    const x = c * cellSize;
+                    const y = r * cellSize;
+
+                    if (currentMap[r][c] === 1) {
+                        // Tembok Labirin: Ungu Elegan
+                        ctx.fillStyle = "#4c1d95"; // violet-900
+                        ctx.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2);
+                        
+                        // Garis tepi estetis
+                        ctx.strokeStyle = "#7c3aed"; // violet-600
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(x + 1, y + 1, cellSize - 2, cellSize - 2);
+                    } else {
+                        // Jalan/Lantai
+                        ctx.fillStyle = "#1e293b"; // slate-800
+                        ctx.fillRect(x, y, cellSize, cellSize);
+                        
+                        // Garis lantai samar
+                        ctx.strokeStyle = "#334155"; // slate-700
+                        ctx.lineWidth = 0.5;
+                        ctx.strokeRect(x, y, cellSize, cellSize);
+                    }
+                }
+            }
+
+            // 2. Gambar Buku Kas (Aset Keuangan)
+            books.forEach(book => {
+                if (!book.collected) {
+                    const x = book.x * cellSize + cellSize / 2;
+                    const y = book.y * cellSize + cellSize / 2;
+                    
+                    // Lingkaran Cahaya Buku
+                    ctx.beginPath();
+                    ctx.arc(x, y, cellSize * 0.4, 0, Math.PI * 2);
+                    ctx.fillStyle = "rgba(59, 130, 246, 0.2)"; // Biru bersinar
+                    ctx.fill();
+
+                    // Emoji Buku
+                    ctx.font = `${cellSize * 0.65}px Arial`;
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("📘", x, y + 1);
+                }
+            });
+
+            // 3. Gambar Musuh (Hantu Defisit)
+            enemies.forEach(enemy => {
+                const x = enemy.x * cellSize + cellSize / 2;
+                const y = enemy.y * cellSize + cellSize / 2;
+                ctx.font = `${cellSize * 0.7}px Arial`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(enemy.icon, x, y);
+            });
+
+            // 4. Gambar Pemain (Ibu Guru Akuntan)
+            const pX = player.x * cellSize + cellSize / 2;
+            const pY = player.y * cellSize + cellSize / 2;
+            
+            // Glow di sekeliling pemain
+            ctx.beginPath();
+            ctx.arc(pX, pY, cellSize * 0.45, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(234, 179, 8, 0.2)"; // Kuning menyala
+            ctx.fill();
+
+            // Emoji Guru
+            ctx.font = `${cellSize * 0.7}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("🧑‍🏫", pX, pY);
+        }
+
+        // GERAKAN PEMAIN DAN LOGIKA TABRAKAN
+        function movePlayer(dx, dy) {
+            if (!gameActive || isPaused) return;
+
+            const nextX = player.x + dx;
+            const nextY = player.y + dy;
+
+            // Cek apakah nabrak tembok
+            if (nextX >= 0 && nextX < GRID_COLS && nextY >= 0 && nextY < GRID_ROWS) {
+                if (currentMap[nextY][nextX] !== 1) {
+                    player.x = nextX;
+                    player.y = nextY;
+                    checkCollisions();
+                    draw();
+                }
+            }
+        }
+
+        // CEK TABRAKAN (DENGAN BUKU MAUPUN MUSUH)
+        function checkCollisions() {
+            // 1. Tabrakan dengan Buku Aset
+            books.forEach(book => {
+                if (!book.collected && book.x === player.x && book.y === player.y) {
+                    book.collected = true;
+                    playSound('coin');
+                    openQuiz(book.quizIndex);
+                }
+            });
+
+            // 2. Tabrakan dengan Musuh
+            enemies.forEach(enemy => {
+                if (enemy.x === player.x && enemy.y === player.y) {
+                    hitByEnemy();
+                }
+            });
+        }
+
+        // APA BILA TERKENA MUSUH
+        function hitByEnemy() {
+            playSound('hit');
+            lives--;
+            score -= 500000; // Defisit saldo denda
+            updateUI();
+
+            // Reset posisi guru ke titik awal (1,1) agar aman sejenak
+            player.x = 1;
+            player.y = 1;
+
+            if (lives <= 0) {
+                endGame(false);
+            }
+        }
+
+        // KECERDASAN BUATAN MUSUH (AI PATROLLING)
+        function updateEnemies() {
+            if (!gameActive || isPaused) return;
+
+            enemies.forEach(enemy => {
+                enemy.speedTimer++;
+                // Mengurangi kecepatan gerak musuh agar adil bagi pemain (bergerak setiap 12 frame)
+                if (enemy.speedTimer < 12) return; 
+                enemy.speedTimer = 0;
+
+                // Cari kemungkinan arah jalan (Atas, Bawah, Kiri, Kanan) yang bukan tembok
+                const possibleDirections = [];
+                const directions = [
+                    { x: 1, y: 0 },
+                    { x: -1, y: 0 },
+                    { x: 0, y: 1 },
+                    { x: 0, y: -1 }
+                ];
+
+                directions.forEach(dir => {
+                    const checkX = enemy.x + dir.x;
+                    const checkY = enemy.y + dir.y;
+                    if (checkX >= 0 && checkX < GRID_COLS && checkY >= 0 && checkY < GRID_ROWS) {
+                        if (currentMap[checkY][checkX] !== 1) {
+                            possibleDirections.push(dir);
+                        }
+                    }
+                });
+
+                if (possibleDirections.length > 0) {
+                    // Cari arah untuk melanjutkan jalan atau berbelok secara acak di persimpangan
+                    let chosenDir = { x: enemy.dirX, y: enemy.dirY };
+                    
+                    // Cek jika arah saat ini masih valid dan tidak membentur
+                    const currentDirValid = possibleDirections.some(d => d.x === enemy.dirX && d.y === enemy.dirY);
+                    
+                    // Jika menabrak tembok atau acak (20% kemungkinan belok di simpang jalan)
+                    if (!currentDirValid || Math.random() < 0.2) {
+                        chosenDir = possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
+                    }
+
+                    enemy.dirX = chosenDir.x;
+                    enemy.dirY = chosenDir.y;
+                    enemy.x += enemy.dirX;
+                    enemy.y += enemy.dirY;
+                }
+
+                // Periksa lagi apakah setelah berjalan menabrak pemain
+                if (enemy.x === player.x && enemy.y === player.y) {
+                    hitByEnemy();
+                }
+            });
+        }
+
+        // ALUR KUIS (QUIZ WORKFLOW)
+        let selectedOptionIndex = null;
+
+        function openQuiz(quizIndex) {
+            isPaused = true; // Pause game sementara kuis aktif
+            currentQuizIndex = quizIndex;
+            selectedOptionIndex = null;
+
+            const quiz = quizData[quizIndex];
+
+            // Reset Tampilan Modal Kuis
+            document.getElementById("quiz-number-tag").innerText = `SOAL ${quizIndex + 1} dari 12`;
+            document.getElementById("quiz-question").innerHTML = quiz.question.replace(/\n/g, "<br>");
+            
+            const optionsContainer = document.getElementById("quiz-options-container");
+            optionsContainer.innerHTML = "";
+
+            quiz.options.forEach((opt, idx) => {
+                const btn = document.createElement("button");
+                btn.className = "w-full text-left p-3.5 rounded-xl border-2 border-slate-200 hover:border-purple-300 hover:bg-purple-50 font-semibold text-slate-700 transition duration-150 active:scale-[0.99] flex items-center gap-3";
+                btn.innerHTML = `<span class="bg-slate-100 text-slate-600 text-xs w-6 h-6 flex items-center justify-center rounded-full font-bold">${String.fromCharCode(65 + idx)}</span> <span class="flex-1">${opt.substring(3)}</span>`;
+                btn.onclick = () => selectOption(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Sembunyikan bagian feedback, tampilkan tombol submit
+            document.getElementById("quiz-feedback").classList.add("hidden");
+            document.getElementById("btn-submit-quiz").classList.remove("hidden");
+            document.getElementById("btn-submit-quiz").disabled = true;
+            document.getElementById("btn-next-adventure").classList.add("hidden");
+
+            // Tampilkan Modal
+            const modal = document.getElementById("quiz-modal");
+            const container = document.getElementById("quiz-container");
+            modal.classList.remove("hidden");
+            setTimeout(() => {
+                container.classList.remove("scale-95", "opacity-0");
+            }, 50);
+        }
+
+        function selectOption(index, buttonElement) {
+            selectedOptionIndex = index;
+            
+            // Reset gaya semua tombol pilihan
+            const buttons = document.getElementById("quiz-options-container").children;
+            for (let btn of buttons) {
+                btn.classList.remove("border-purple-500", "bg-purple-100");
+                btn.classList.add("border-slate-200");
+            }
+
+            // Tandai tombol terpilih
+            buttonElement.classList.add("border-purple-500", "bg-purple-100");
+            buttonElement.classList.remove("border-slate-200");
+
+            // Aktifkan tombol submit
+            document.getElementById("btn-submit-quiz").disabled = false;
+        }
+
+        // PROSES PENILAIAN SOAL
+        document.getElementById("btn-submit-quiz").onclick = () => {
+            if (selectedOptionIndex === null) return;
+
+            const quiz = quizData[currentQuizIndex];
+            const isCorrect = selectedOptionIndex === quiz.answer;
+            
+            // Sembunyikan tombol submit
+            document.getElementById("btn-submit-quiz").classList.add("hidden");
+
+            const feedbackArea = document.getElementById("quiz-feedback");
+            const feedbackTitle = document.getElementById("feedback-title");
+            const feedbackExplanation = document.getElementById("feedback-explanation");
+
+            feedbackArea.classList.remove("hidden");
+
+            // Disable interaksi di semua pilihan jawaban
+            const buttons = document.getElementById("quiz-options-container").children;
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].onclick = null; // nonaktifkan klik
+                if (i === quiz.answer) {
+                    buttons[i].classList.add("bg-emerald-100", "border-emerald-500", "text-emerald-800");
+                } else if (i === selectedOptionIndex) {
+                    buttons[i].classList.add("bg-rose-100", "border-rose-500", "text-rose-800");
+                }
+            }
+
+            if (isCorrect) {
+                playSound('correct');
+                score += 2000000; // Surplus Rp2.000.000
+                correctAnswersCount++;
+                feedbackArea.className = "mt-6 p-4 rounded-2xl bg-emerald-100 border border-emerald-300 text-emerald-900";
+                feedbackTitle.innerHTML = "🎉 Jawaban Benar! (Surplus +Rp2.000.000)";
+            } else {
+                playSound('wrong');
+                score -= 1000000; // Defisit -Rp1.000.000
+                feedbackArea.className = "mt-6 p-4 rounded-2xl bg-rose-100 border border-rose-300 text-rose-900";
+                feedbackTitle.innerHTML = "❌ Jawaban Kurang Tepat (Defisit -Rp1.000.000)";
+            }
+
+            feedbackExplanation.innerHTML = `<strong>Pembahasan:</strong> ${quiz.explanation}`;
+            
+            questionsAnswered++;
+            updateUI();
+
+            // Tampilkan tombol lanjut
+            document.getElementById("btn-next-adventure").classList.remove("hidden");
+        };
+
+        // KEMBALI KE LABIRIN SETELAH MENJAWAB SOAL KUIS
+        document.getElementById("btn-next-adventure").onclick = () => {
+            const modal = document.getElementById("quiz-modal");
+            const container = document.getElementById("quiz-container");
+            
+            container.classList.add("scale-95", "opacity-0");
+            setTimeout(() => {
+                modal.classList.add("hidden");
+                isPaused = false; // Lanjutkan permainan kembali
+                
+                // Cek apakah semua buku / pertanyaan sudah selesai dijawab
+                if (questionsAnswered === 12) {
+                    endGame(true);
+                }
+            }, 300);
+        };
+
+        // GAME OVER ATAU KEMENANGAN (WIN CONDITION)
+        function endGame(victory) {
+            gameActive = false;
+            if (victory) {
+                document.getElementById("victory-final-score").innerText = score >= 0 ? 
+                    `Rp${score.toLocaleString('id-ID')}` : 
+                    `-Rp${Math.abs(score).toLocaleString('id-ID')}`;
+                
+                const accuracy = Math.round((correctAnswersCount / 12) * 100);
+                document.getElementById("victory-accuracy").innerText = `Akurasi Jawaban Anda: ${accuracy}% (${correctAnswersCount} dari 12 benar)`;
+                
+                document.getElementById("victory-overlay").classList.remove("hidden");
+            } else {
+                document.getElementById("gameover-final-score").innerText = score >= 0 ? 
+                    `Rp${score.toLocaleString('id-ID')}` : 
+                    `-Rp${Math.abs(score).toLocaleString('id-ID')}`;
+                document.getElementById("gameover-overlay").classList.remove("hidden");
+            }
+        }
+
+        // LOOP PERMAINAN (GAME LOOP)
+        function gameLoop() {
+            if (!gameActive) return;
+
+            updateEnemies();
+            draw();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // BIND EVENT PADA TOMBOL DAN KEYBOARD
+        document.getElementById("btn-start").onclick = () => {
+            // Aktifkan Audio Context saat interaksi user pertama kali
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            resetGame();
+        };
+
+        // Kontrol Keyboard Fisik
+        window.addEventListener("keydown", (e) => {
+            if (!gameActive || isPaused) return;
+            switch(e.key) {
+                case "ArrowUp":
+                case "w":
+                case "W":
+                    movePlayer(0, -1);
+                    e.preventDefault();
+                    break;
+                case "ArrowDown":
+                case "s":
+                case "S":
+                    movePlayer(0, 1);
+                    e.preventDefault();
+                    break;
+                case "ArrowLeft":
+                case "a":
+                case "A":
+                    movePlayer(-1, 0);
+                    e.preventDefault();
+                    break;
+                case "ArrowRight":
+                case "d":
+                case "D":
+                    movePlayer(1, 0);
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        // Kontrol Virtual D-Pad (Touchscreen)
+        document.getElementById("ctrl-up").onclick = () => movePlayer(0, -1);
+        document.getElementById("ctrl-down").onclick = () => movePlayer(0, 1);
+        document.getElementById("ctrl-left").onclick = () => movePlayer(-1, 0);
+        document.getElementById("ctrl-right").onclick = () => movePlayer(1, 0);
+
+        // Load awal canvas kosong/menunggu interaksi
+        window.onload = () => {
+            resizeCanvas();
+        };
+    </script>
+</body>
+</html>
