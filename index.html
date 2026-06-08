@@ -21,63 +21,54 @@
 <body class="bg-gradient-to-b from-slate-900 to-slate-950 text-white min-h-screen w-screen overflow-hidden flex flex-col items-center justify-center p-2 sm:p-4 select-none">
 
     <!-- WRAPPER UTAMA: Mengunci ukuran agar pas di layar HP tanpa scroll -->
-    <div class="w-full max-w-[450px] h-full flex flex-col justify-between items-center gap-2">
+    <div class="w-full max-w-[450px] h-full flex flex-col justify-between items-center gap-1">
         
         <!-- HEADER STATUS -->
         <header class="w-full bg-slate-800/90 border border-slate-700/60 rounded-xl p-3 flex items-center justify-between shadow-md">
             <div class="flex items-center gap-2">
                 <span class="text-2xl">🏫</span>
                 <div>
-                    <h1 class="title-font text-sm sm:text-base text-yellow-400 tracking-wide leading-none">PAUD Edu-Kas</h1>
+                    <h1 class="title-font text-xs sm:text-sm text-yellow-400 tracking-wide leading-none" id="player-display-name">Akuntan PAUD</h1>
                     <span id="progress-val" class="text-[10px] text-purple-300 font-bold">Buku: 0 / 12</span>
                 </div>
             </div>
             
-            <div class="flex gap-2 text-right">
-                <div class="bg-slate-900/80 px-2.5 py-1 rounded-lg border border-emerald-500/30">
-                    <span class="text-[9px] text-emerald-400 font-bold block leading-none">KAS</span>
-                    <span id="score-val" class="font-bold text-xs sm:text-sm text-emerald-300 font-mono">Rp0</span>
+            <div class="flex gap-2 items-center">
+                <div class="bg-slate-900/80 px-2 py-0.5 rounded-lg border border-emerald-500/30 text-center">
+                    <span class="text-[8px] text-emerald-400 font-bold block leading-none">KAS</span>
+                    <span id="score-val" class="font-bold text-xs text-emerald-300 font-mono">Rp0</span>
                 </div>
-                <div class="bg-slate-900/80 px-2.5 py-1 rounded-lg border border-rose-500/30 flex flex-col justify-center">
-                    <span id="lives-val" class="text-xs tracking-tighter">❤️❤️❤️</span>
+                <div class="bg-slate-900/80 px-2 py-1.5 rounded-lg border border-rose-500/30 flex items-center justify-center">
+                    <span id="lives-val" class="text-[10px] tracking-tighter">❤️❤️❤️</span>
                 </div>
+                <!-- Tombol Leaderboard -->
+                <button id="btn-show-rank" class="bg-amber-500 hover:bg-amber-400 text-slate-950 p-2 rounded-lg font-bold text-xs transition active:scale-90" title="Papan Peringkat">
+                    🏆
+                </button>
             </div>
         </header>
 
-        <!-- CONTAINER LAYAR UTAMA (SQUARE & COMPACT) -->
-        <div class="relative w-full aspect-[3/4] max-h-[75vh] bg-slate-950 rounded-2xl shadow-2xl overflow-hidden border-4 border-slate-800 flex flex-col justify-between">
-            
+        <!-- CONTAINER PERMAINAN -->
+        <div class="relative w-full aspect-square bg-slate-950 rounded-2xl shadow-2xl overflow-hidden border-4 border-slate-800 flex flex-col justify-between">
             <!-- CANVAS GAME (LABIRIN) -->
-            <div class="relative flex-1 w-full bg-slate-950">
-                <canvas id="gameCanvas" class="w-full h-full block"></canvas>
-                
-                <!-- TOMBOL KONTROL DI DALAM GAME (OVERLAY DI ATAS CANVAS) -->
-                <div class="absolute bottom-3 left-0 right-0 flex justify-center items-center pointer-events-none z-10">
-                    <div class="grid grid-cols-3 gap-2 w-40 pointer-events-auto bg-slate-900/80 backdrop-blur-md p-2 rounded-2xl border border-slate-700/50 shadow-lg">
-                        <div></div>
-                        <button id="ctrl-up" class="bg-slate-700/90 active:bg-yellow-500 text-white active:text-slate-950 font-bold h-10 w-10 rounded-xl flex items-center justify-center shadow transition-all mx-auto text-lg border border-slate-600">▲</button>
-                        <div></div>
-                        
-                        <button id="ctrl-left" class="bg-slate-700/90 active:bg-yellow-500 text-white active:text-slate-950 font-bold h-10 w-10 rounded-xl flex items-center justify-center shadow transition-all mx-auto text-lg border border-slate-600">◀</button>
-                        <div class="flex items-center justify-center text-slate-500 text-xs font-bold">🕹️</div>
-                        <button id="ctrl-right" class="bg-slate-700/90 active:bg-yellow-500 text-white active:text-slate-950 font-bold h-10 w-10 rounded-xl flex items-center justify-center shadow transition-all mx-auto text-lg border border-slate-600">▶</button>
-                        
-                        <div></div>
-                        <button id="ctrl-down" class="bg-slate-700/90 active:bg-yellow-500 text-white active:text-slate-950 font-bold h-10 w-10 rounded-xl flex items-center justify-center shadow transition-all mx-auto text-lg border border-slate-600">▼</button>
-                        <div></div>
-                    </div>
-                </div>
-            </div>
+            <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 
-            <!-- OVERLAY: START SCREEN -->
+            <!-- OVERLAY: REGISTRASI NAMA (START SCREEN) -->
             <div id="start-overlay" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-20">
                 <span class="text-5xl mb-2 animate-bounce">🧑‍🏫</span>
-                <h2 class="title-font text-xl text-yellow-400 mb-2">Petualangan Akuntansi PAUD</h2>
-                <p class="text-slate-400 text-xs max-w-xs mb-6 leading-relaxed">
-                    Kumpulkan <span class="text-blue-400 font-bold">12 Buku Kas (📘)</span> di sekolah. Hindari hantu <span class="text-red-400 font-bold">Defisit (👾)</span>! Selesaikan kuisnya untuk mengamankan surplus keuangan.
+                <h2 class="title-font text-xl text-yellow-400 mb-1">Petualangan Akuntansi PAUD</h2>
+                <p class="text-slate-400 text-[11px] max-w-xs mb-4 leading-relaxed">
+                    Kumpulkan <span class="text-blue-400 font-bold">12 Buku Kas (📘)</span>. Hindari hantu <span class="text-red-400 font-bold">Defisit (👾)</span>! Selesaikan audit kuis untuk surplus finansial.
                 </p>
-                <button id="btn-start" class="title-font bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 px-6 py-2.5 rounded-xl shadow-md font-bold hover:brightness-110 active:scale-95 text-sm transition">
-                    MULAI GAME
+                
+                <!-- Input Nama Kustom -->
+                <div class="w-full max-w-xs mb-4">
+                    <label class="block text-left text-[10px] text-amber-400 font-bold uppercase tracking-wider mb-1">Nama Akuntan / Lembaga:</label>
+                    <input type="text" id="username-input" maxlength="15" placeholder="Masukkan nama Anda..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white text-center focus:outline-none focus:border-yellow-400 font-bold">
+                </div>
+
+                <button id="btn-start" class="title-font bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 px-8 py-2.5 rounded-xl shadow-md font-bold hover:brightness-110 active:scale-95 text-xs transition">
+                    MULAI PETUALANGAN
                 </button>
             </div>
 
@@ -90,7 +81,7 @@
                     <p class="text-[10px] text-slate-500 font-bold">SALDO AKHIR KAS:</p>
                     <p id="gameover-final-score" class="text-sm font-bold text-red-400">Rp0</p>
                 </div>
-                <button onclick="resetGame()" class="title-font bg-rose-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold active:scale-95 transition">
+                <button onclick="resetGame()" class="title-font bg-rose-500 text-white px-6 py-2 rounded-xl text-xs font-bold active:scale-95 transition">
                     COBA LAGI
                 </button>
             </div>
@@ -99,7 +90,7 @@
             <div id="victory-overlay" class="absolute inset-0 bg-slate-950/95 hidden flex flex-col items-center justify-center p-6 text-center z-20">
                 <span class="text-5xl mb-2">🏆</span>
                 <h2 class="title-font text-xl text-yellow-400 mb-1">Audit Sukses & Surplus!</h2>
-                <p class="text-slate-400 text-xs max-w-xs mb-4">Luar biasa! Anda berhasil mengelola laporan keuangan PAUD dengan sangat transparan.</p>
+                <p class="text-slate-400 text-xs max-w-xs mb-4">Luar biasa! Laporan keuangan PAUD berhasil diaudit secara transparan.</p>
                 <div class="bg-slate-900 border border-yellow-500/20 px-4 py-3 rounded-xl mb-5 w-56 mx-auto">
                     <p class="text-[10px] text-slate-500 font-bold">TOTAL SALDO SURPLUS:</p>
                     <p id="victory-final-score" class="text-base font-bold text-emerald-400">Rp0</p>
@@ -111,10 +102,31 @@
             </div>
         </div>
 
-        <!-- FOOTER PETUNJUK RINGKAS -->
-        <footer class="text-center text-[10px] text-slate-500 font-medium">
-            Gunakan tombol panah di layar atau keyboard (WASD)
-        </footer>
+        <!-- AREA KONTROL DAN PANEL IN-GAME (DITARUH DI BAWAH GAME PAS LAYAR HP) -->
+        <div class="w-full flex flex-col items-center gap-1.5 py-1">
+            
+            <!-- TOMBOL NAVIGASI D-PAD VIRTUAL -->
+            <div class="grid grid-cols-3 gap-2 w-36 bg-slate-900/90 border border-slate-800 p-1.5 rounded-2xl shadow-lg">
+                <div></div>
+                <button id="ctrl-up" class="bg-slate-800 active:bg-yellow-500 text-white active:text-slate-950 font-bold h-9 w-9 rounded-xl flex items-center justify-center shadow transition-all mx-auto text-sm border border-slate-700">▲</button>
+                <div></div>
+                
+                <button id="ctrl-left" class="bg-slate-800 active:bg-yellow-500 text-white active:text-slate-950 font-bold h-9 w-9 rounded-xl flex items-center justify-center shadow transition-all mx-auto text-sm border border-slate-700">◀</button>
+                <div class="flex items-center justify-center text-slate-600 text-xs font-bold">🕹️</div>
+                <button id="ctrl-right" class="bg-slate-800 active:bg-yellow-500 text-white active:text-slate-950 font-bold h-9 w-9 rounded-xl flex items-center justify-center shadow transition-all mx-auto text-sm border border-slate-700">▶</button>
+                
+                <div></div>
+                <button id="ctrl-down" class="bg-slate-800 active:bg-yellow-500 text-white active:text-slate-950 font-bold h-9 w-9 rounded-xl flex items-center justify-center shadow transition-all mx-auto text-sm border border-slate-700">▼</button>
+                <div></div>
+            </div>
+
+            <!-- LEGENDA WARNA TAMPILAN KARAKTER -->
+            <div class="bg-slate-800/40 border border-slate-800 rounded-xl px-3 py-1 w-full text-[9px] flex justify-around text-slate-400 gap-1">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-400 shadow-[0_0_4px_#facc15]"></span>🧑‍🏫 Guru (Kuning)</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_4px_#3b82f6]"></span>📘 Aset (Biru)</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_4px_#ef4444]"></span>👾 Hantu (Merah)</span>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL POP-UP SOAL KUIS (RESPONSIF NYAMAN DI HP) -->
@@ -128,7 +140,7 @@
                 <span id="quiz-number-tag" class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded-full font-bold">SOAL 1/12</span>
             </div>
 
-            <div class="p-4 overflow-y-auto max-h-[55vh] flex-grow">
+            <div class="p-4 overflow-y-auto max-h-[50vh] flex-grow">
                 <p id="quiz-question" class="font-bold text-xs sm:text-sm text-slate-900 mb-3 leading-relaxed">
                     Pertanyaan kuis...
                 </p>
@@ -152,14 +164,198 @@
         </div>
     </div>
 
-    <!-- AUDIO SINTESIS (WEB AUDIO API) -->
-    <script>
+    <!-- MODAL: PAPAN PERINGKAT & PENGUNJUNG TERDETEKSI -->
+    <div id="rank-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-slate-900 rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden border-2 border-slate-700 text-white flex flex-col transform transition-all duration-300 scale-95 opacity-0" id="rank-container">
+            
+            <div class="bg-slate-850 px-4 py-3 flex justify-between items-center border-b border-slate-800">
+                <span class="title-font text-xs tracking-wider flex items-center gap-1.5 text-yellow-400">
+                    🏆 PAPAN PERINGKAT & DETEKSI AKTIF
+                </span>
+                <button onclick="toggleRankModal(false)" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+            </div>
+
+            <!-- Konten Leaderboard & Siapa Saja yang Masuk -->
+            <div class="p-4 overflow-y-auto max-h-[60vh] space-y-4">
+                <!-- Tab Leaderboard -->
+                <div>
+                    <h3 class="text-xs font-bold text-amber-400 mb-2 border-b border-slate-800 pb-1 flex justify-between">
+                        <span>🏅 KINERJA AUDIT TERBAIK</span>
+                        <span class="text-[9px] text-slate-500">Urut: Kas Tertinggi</span>
+                    </h3>
+                    <div id="leaderboard-list" class="space-y-1.5 max-h-[25vh] overflow-y-auto text-xs">
+                        <p class="text-slate-500 text-center py-2">Memuat peringkat dari server...</p>
+                    </div>
+                </div>
+
+                <!-- Tab Siapa Saja Yang Sudah Masuk -->
+                <div>
+                    <h3 class="text-xs font-bold text-emerald-400 mb-2 border-b border-slate-800 pb-1 flex justify-between">
+                        <span>🟢 AKTIVITAS MASUK TERBARU</span>
+                        <span class="text-[9px] text-slate-500">Live Terdeteksi</span>
+                    </h3>
+                    <div id="active-players-list" class="space-y-1.5 max-h-[25vh] overflow-y-auto text-xs">
+                        <p class="text-slate-500 text-center py-2">Memuat daftar pengunjung...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-850 px-4 py-2.5 flex justify-end border-t border-slate-800">
+                <button onclick="toggleRankModal(false)" class="title-font bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition">
+                    TUTUP
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE & CORE LOGIC -->
+    <script type="module">
+        // Import modul resmi SDK Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // CONFIG FIREBASE SENSITIF & FALLBACK
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "",
+            authDomain: "edu-paud-game.firebaseapp.com",
+            projectId: "edu-paud-game",
+            storageBucket: "edu-paud-game.appspot.com",
+            messagingSenderId: "12345678",
+            appId: "1:12345:web:12345"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'paud-audit-maze';
+
+        let currentUser = null;
+        let playerName = "Akuntan PAUD";
+
+        // TATA CARA AUTHENTICATION (RULE 3)
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Gagal melakukan login anonim:", err);
+            }
+        };
+
+        // Mulai auth saat script dimuat
+        initAuth();
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                // Daftarkan listener sinkronisasi data leaderboard setelah login sukses
+                setupFirebaseListeners();
+            }
+        });
+
+        // SIMPAN DATA LEADERBOARD & AKTIVITAS KE FIRESTORE (RULE 1)
+        async function syncPlayerDataToServer(status = "bermain", finalScore = 0) {
+            if (!currentUser) return;
+            try {
+                const cleanName = playerName.trim() || "Anonim";
+                
+                // Simpan/perbarui riwayat pengunjung publik
+                const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'players', currentUser.uid);
+                await setDoc(userDocRef, {
+                    name: cleanName,
+                    uid: currentUser.uid,
+                    status: status,
+                    lastActive: serverTimestamp(),
+                    score: status === "selesai" ? finalScore : score
+                }, { merge: true });
+
+            } catch (e) {
+                console.error("Error sinkronisasi data:", e);
+            }
+        }
+
+        // AMBIL & SINKRONKAN DATA LEADERBOARD DAN PENGUNJUNG SECARA LIVE (RULE 2 - NO COMPLEX QUERIES)
+        function setupFirebaseListeners() {
+            if (!currentUser) return;
+
+            const playersCollection = collection(db, 'artifacts', appId, 'public', 'data', 'players');
+            
+            // Menggunakan query sederhana tanpa orderBy/where yang butuh indeks rumit
+            onSnapshot(playersCollection, (snapshot) => {
+                const allPlayers = [];
+                snapshot.forEach(doc => {
+                    allPlayers.push(doc.data());
+                });
+
+                // Lakukan sorting dan penyaringan langsung di memori JavaScript (Aman & Sesuai Aturan)
+                // 1. Render Papan Peringkat (Urutkan dari Skor Tertinggi)
+                const sortedRank = [...allPlayers]
+                    .filter(p => p.score !== undefined)
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 10); // Ambil 10 teratas
+
+                const leaderboardContainer = document.getElementById("leaderboard-list");
+                leaderboardContainer.innerHTML = "";
+                if (sortedRank.length === 0) {
+                    leaderboardContainer.innerHTML = `<p class="text-slate-500 text-center py-2">Belum ada skor tercatat.</p>`;
+                } else {
+                    sortedRank.forEach((player, idx) => {
+                        const rankMedal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}.`;
+                        const row = document.createElement("div");
+                        row.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg border border-slate-700/50";
+                        row.innerHTML = `
+                            <span class="font-bold flex items-center gap-2">
+                                <span class="text-amber-400 font-mono">${rankMedal}</span>
+                                <span class="${player.uid === currentUser.uid ? 'text-yellow-300 font-extrabold' : ''}">${player.name}</span>
+                            </span>
+                            <span class="font-bold text-emerald-400 font-mono">Rp${player.score.toLocaleString('id-ID')}</span>
+                        `;
+                        leaderboardContainer.appendChild(row);
+                    });
+                }
+
+                // 2. Render Siapa Saja Yang Sudah Masuk (Urutkan dari waktu aktivitas terbaru)
+                const sortedActive = [...allPlayers]
+                    .sort((a, b) => {
+                        const tA = a.lastActive?.seconds || 0;
+                        const tB = b.lastActive?.seconds || 0;
+                        return tB - tA;
+                    });
+
+                const activeContainer = document.getElementById("active-players-list");
+                activeContainer.innerHTML = "";
+                sortedActive.forEach(player => {
+                    const statusBadge = player.status === "selesai" ? 
+                        '<span class="bg-emerald-500/20 text-emerald-400 text-[8px] px-1.5 py-0.5 rounded font-bold">LULUS AUDIT</span>' : 
+                        '<span class="bg-yellow-500/20 text-yellow-400 text-[8px] px-1.5 py-0.5 rounded font-bold">ONLINE</span>';
+                    const row = document.createElement("div");
+                    row.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg border border-slate-700/50";
+                    row.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="font-bold text-slate-200">${player.name}</span>
+                            <span class="text-[8px] text-slate-500 font-mono">${player.uid}</span>
+                        </div>
+                        <div class="text-right">
+                            ${statusBadge}
+                        </div>
+                    `;
+                    activeContainer.appendChild(row);
+                });
+
+            }, (error) => {
+                console.error("Gagal memuat database real-time:", error);
+            });
+        }
+
+        // TATA SUARA SINTESIS (WEB AUDIO API)
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(type) {
             try {
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
+                if (audioCtx.state === 'suspended') audioCtx.resume();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain); gain.connect(audioCtx.destination);
@@ -184,10 +380,8 @@
                 }
             } catch(e){}
         }
-    </script>
 
-    <!-- ENGINE LOGIKAL PERMAINAN -->
-    <script>
+        // CORE GAME ENGINE
         const quizData = [
             { id: 1, question: "Tujuan utama akuntansi pada lembaga PAUD adalah ....", options: ["A. Menentukan kurikulum pembelajaran", "B. Mengelola dan menyajikan informasi keuangan secara sistematis", "C. Menambah jumlah peserta didik", "D. Menentukan jadwal kegiatan belajar"], answer: 1, explanation: "Tujuan utama akuntansi dalam organisasi nirlaba maupun PAUD adalah menyajikan informasi keuangan yang teratur, transparan, dan sistematis bagi pengambil keputusan." },
             { id: 2, question: "Salah satu manfaat akuntansi bagi lembaga PAUD adalah ....", options: ["A. Mengurangi jumlah tenaga pendidik", "B. Mempermudah pengelolaan dan pengawasan keuangan", "C. Menentukan metode pembelajaran anak", "D. Menambah jam operasional sekolah"], answer: 1, explanation: "Dengan akuntansi terstandar, pengelola dapat dengan mudah memantau arus masuk-keluar uang dan merencanakan anggaran yang sehat." },
@@ -230,9 +424,11 @@
         let gameActive = false, isPaused = false;
         let score = 0, lives = 3, questionsAnswered = 0, correctAnswersCount = 0;
         let player = { x: 1, y: 1 }, books = [], currentQuizIndex = null;
+        
+        // Atur 2 musuh dengan patroli warna dan pendaran masing-masing
         let enemies = [
-            { x: 6, y: 5, dirX: 1, dirY: 0, speedTimer: 0, icon: "👾" },
-            { x: 11, y: 11, dirX: -1, dirY: 0, speedTimer: 0, icon: "📉" }
+            { x: 6, y: 5, dirX: 1, dirY: 0, speedTimer: 0, icon: "👾", color: "#ef4444" }, // Merah
+            { x: 11, y: 11, dirX: -1, dirY: 0, speedTimer: 0, icon: "📉", color: "#f97316" } // Oranye
         ];
 
         const bookSpawnPositions = [
@@ -256,8 +452,8 @@
             currentMap = JSON.parse(JSON.stringify(originalMap));
             score = 0; lives = 3; questionsAnswered = 0; correctAnswersCount = 0;
             player = { x: 1, y: 1 };
-            enemies[0] = { x: 6, y: 5, dirX: 1, dirY: 0, speedTimer: 0, icon: "👾" };
-            enemies[1] = { x: 11, y: 11, dirX: -1, dirY: 0, speedTimer: 0, icon: "📉" };
+            enemies[0] = { x: 6, y: 5, dirX: 1, dirY: 0, speedTimer: 0, icon: "👾", color: "#ef4444" };
+            enemies[1] = { x: 11, y: 11, dirX: -1, dirY: 0, speedTimer: 0, icon: "📉", color: "#f97316" };
 
             books = bookSpawnPositions.map((pos, idx) => ({
                 x: pos.x, y: pos.y, quizIndex: idx, collected: false
@@ -271,6 +467,8 @@
             gameActive = true; isPaused = false;
             resizeCanvas();
             gameLoop();
+            
+            syncPlayerDataToServer("bermain");
         }
 
         function updateUI() {
@@ -284,6 +482,7 @@
             ctx.fillStyle = "#0f172a";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            // 1. Gambar Grid & Tembok Labirin
             for (let r = 0; r < GRID_ROWS; r++) {
                 for (let c = 0; c < GRID_COLS; c++) {
                     const x = c * cellSize, y = r * cellSize;
@@ -297,23 +496,52 @@
                 }
             }
 
+            // 2. Gambar Buku Aset (Buku Kas Biru) dengan pendaran neon biru
             books.forEach(book => {
                 if (!book.collected) {
+                    const bx = book.x * cellSize + cellSize/2;
+                    const by = book.y * cellSize + cellSize/2;
+                    
+                    // Pendaran Biru Neon
+                    ctx.beginPath();
+                    ctx.arc(bx, by, cellSize * 0.45, 0, Math.PI * 2);
+                    ctx.fillStyle = "rgba(59, 130, 246, 0.25)";
+                    ctx.fill();
+
                     ctx.font = `${cellSize * 0.6}px Arial`;
                     ctx.textAlign = "center"; ctx.textBaseline = "middle";
-                    ctx.fillText("📘", book.x * cellSize + cellSize/2, book.y * cellSize + cellSize/2);
+                    ctx.fillText("📘", bx, by);
                 }
             });
 
+            // 3. Gambar Musuh (Hantu Defisit/Utang) dengan pendaran warna masing-masing
             enemies.forEach(enemy => {
+                const ex = enemy.x * cellSize + cellSize/2;
+                const ey = enemy.y * cellSize + cellSize/2;
+
+                // Pendaran warna musuh (Merah / Oranye)
+                ctx.beginPath();
+                ctx.arc(ex, ey, cellSize * 0.45, 0, Math.PI * 2);
+                ctx.fillStyle = enemy.color === "#ef4444" ? "rgba(239, 68, 68, 0.25)" : "rgba(249, 115, 22, 0.25)";
+                ctx.fill();
+
                 ctx.font = `${cellSize * 0.65}px Arial`;
                 ctx.textAlign = "center"; ctx.textBaseline = "middle";
-                ctx.fillText(enemy.icon, enemy.x * cellSize + cellSize/2, enemy.y * cellSize + cellSize/2);
+                ctx.fillText(enemy.icon, ex, ey);
             });
+
+            // 4. Gambar Pemain (Ibu Guru) dengan pendaran emas/kuning
+            const px = player.x * cellSize + cellSize/2;
+            const py = player.y * cellSize + cellSize/2;
+            
+            ctx.beginPath();
+            ctx.arc(px, py, cellSize * 0.48, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(250, 204, 21, 0.3)"; // Emas menyala
+            ctx.fill();
 
             ctx.font = `${cellSize * 0.65}px Arial`;
             ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.fillText("🧑‍🏫", player.x * cellSize + cellSize/2, player.y * cellSize + cellSize/2);
+            ctx.fillText("🧑‍🏫", px, py);
         }
 
         function movePlayer(dx, dy) {
@@ -344,6 +572,7 @@
             lives--; score -= 500000;
             updateUI();
             player.x = 1; player.y = 1;
+            syncPlayerDataToServer("bermain");
             if (lives <= 0) endGame(false);
         }
 
@@ -438,6 +667,7 @@
             }
             document.getElementById("feedback-explanation").innerHTML = `Pembahasan: ${quiz.explanation}`;
             questionsAnswered++; updateUI();
+            syncPlayerDataToServer("bermain");
             document.getElementById("btn-next-adventure").classList.remove("hidden");
         };
 
@@ -454,11 +684,14 @@
             gameActive = false;
             const tgtScore = victory ? "victory-final-score" : "gameover-final-score";
             document.getElementById(tgtScore).innerText = score >= 0 ? `Rp${score.toLocaleString('id-ID')}` : `-Rp${Math.abs(score).toLocaleString('id-ID')}`;
+            
             if (victory) {
                 document.getElementById("victory-accuracy").innerText = `Akurasi: ${Math.round((correctAnswersCount / 12) * 100)}% (${correctAnswersCount}/12 Benar)`;
                 document.getElementById("victory-overlay").classList.remove("hidden");
+                syncPlayerDataToServer("selesai", score);
             } else {
                 document.getElementById("gameover-overlay").classList.remove("hidden");
+                syncPlayerDataToServer("gagal", score);
             }
         }
 
@@ -468,7 +701,20 @@
             requestAnimationFrame(gameLoop);
         }
 
+        // Mulai Game Setelah Mengatur Nama
         document.getElementById("btn-start").onclick = () => {
+            const inputVal = document.getElementById("username-input").value.trim();
+            if (inputVal === "") {
+                // Flash input as warning
+                const inp = document.getElementById("username-input");
+                inp.classList.add("border-rose-500", "animate-shake");
+                setTimeout(() => inp.classList.remove("border-rose-500", "animate-shake"), 500);
+                return;
+            }
+            
+            playerName = inputVal;
+            document.getElementById("player-display-name").innerText = playerName;
+
             if (audioCtx.state === 'suspended') audioCtx.resume();
             resetGame();
         };
@@ -482,7 +728,7 @@
             if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") movePlayer(1, 0);
         });
 
-        // Touch Control D-Pad yang responsif di HP
+        // Touch Control D-Pad yang responsif di bawah game
         const bindControl = (id, dx, dy) => {
             const btn = document.getElementById(id);
             btn.addEventListener("touchstart", (e) => {
@@ -490,7 +736,6 @@
                 movePlayer(dx, dy);
             }, { passive: false });
             btn.addEventListener("mousedown", (e) => {
-                // Sebagai fallback mouse
                 movePlayer(dx, dy);
             });
         };
@@ -500,7 +745,25 @@
         bindControl("ctrl-left", -1, 0);
         bindControl("ctrl-right", 1, 0);
 
+        // Pengendali Modal Ranking
+        window.toggleRankModal = function(show) {
+            const modal = document.getElementById("rank-modal");
+            const container = document.getElementById("rank-container");
+            if (show) {
+                modal.classList.remove("hidden");
+                setTimeout(() => container.classList.remove("scale-95", "opacity-0"), 50);
+            } else {
+                container.classList.add("scale-95", "opacity-0");
+                setTimeout(() => modal.classList.add("hidden"), 200);
+            }
+        }
+
+        document.getElementById("btn-show-rank").onclick = () => {
+            window.toggleRankModal(true);
+        };
+
         window.onload = resizeCanvas;
+        window.resetGame = resetGame;
     </script>
 </body>
 </html>
