@@ -16,6 +16,14 @@
         .title-font {
             font-family: 'Fredoka One', cursive;
         }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+        .animate-shake {
+            animation: shake 0.2s ease-in-out 2;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-b from-slate-900 to-slate-950 text-white min-h-screen w-screen overflow-hidden flex flex-col items-center justify-center p-2 sm:p-4 select-none">
@@ -58,7 +66,7 @@
                 <span class="text-5xl mb-2 animate-bounce">🧑‍🏫</span>
                 <h2 class="title-font text-xl text-yellow-400 mb-1">Petualangan Akuntansi PAUD</h2>
                 <p class="text-slate-400 text-[11px] max-w-xs mb-4 leading-relaxed">
-                    Kumpulkan <span class="text-blue-400 font-bold">12 Buku Kas (📘)</span>. Hindari hantu <span class="text-red-400 font-bold">Defisit (👾)</span>! Selesaikan audit kuis untuk surplus finansial.
+                    Kumpulkan <span class="text-blue-400 font-bold">12 Buku Kas (📘)</span>. Hindari hantu <span class="text-red-400 font-bold">Defisit (👾)</span>! Selesaikan kuis untuk surplus finansial.
                 </p>
                 
                 <!-- Input Nama Kustom -->
@@ -97,7 +105,7 @@
                     <p id="victory-accuracy" class="text-[10px] text-slate-400 mt-1">Akurasi: 0%</p>
                 </div>
                 <button onclick="resetGame()" class="title-font bg-emerald-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold active:scale-95 transition">
-                    MAIN LAGI
+                    MAIN LAGE
                 </button>
             </div>
         </div>
@@ -129,7 +137,7 @@
         </div>
     </div>
 
-    <!-- MODAL POP-UP SOAL KUIS (RESPONSIF NYAMAN DI HP) -->
+    <!-- MODAL POP-UP SOAL KUIS -->
     <div id="quiz-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
         <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden border-2 border-slate-200 text-slate-800 flex flex-col transform transition-all duration-300 scale-95 opacity-0" id="quiz-container">
             
@@ -184,7 +192,7 @@
                         <span class="text-[9px] text-slate-500">Urut: Kas Tertinggi</span>
                     </h3>
                     <div id="leaderboard-list" class="space-y-1.5 max-h-[25vh] overflow-y-auto text-xs">
-                        <p class="text-slate-500 text-center py-2">Memuat peringkat dari server...</p>
+                        <p class="text-slate-400 text-center py-2">Mode offline aktif / Memuat...</p>
                     </div>
                 </div>
 
@@ -195,7 +203,7 @@
                         <span class="text-[9px] text-slate-500">Live Terdeteksi</span>
                     </h3>
                     <div id="active-players-list" class="space-y-1.5 max-h-[25vh] overflow-y-auto text-xs">
-                        <p class="text-slate-500 text-center py-2">Memuat daftar pengunjung...</p>
+                        <p class="text-slate-400 text-center py-2">Tidak ada aktivitas jaringan...</p>
                     </div>
                 </div>
             </div>
@@ -208,150 +216,9 @@
         </div>
     </div>
 
-    <!-- FIREBASE & CORE LOGIC -->
-    <script type="module">
-        // Import modul resmi SDK Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // CONFIG FIREBASE SENSITIF & FALLBACK
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "",
-            authDomain: "edu-paud-game.firebaseapp.com",
-            projectId: "edu-paud-game",
-            storageBucket: "edu-paud-game.appspot.com",
-            messagingSenderId: "12345678",
-            appId: "1:12345:web:12345"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'paud-audit-maze';
-
-        let currentUser = null;
-        let playerName = "Akuntan PAUD";
-
-        // TATA CARA AUTHENTICATION (RULE 3)
-        const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.error("Gagal melakukan login anonim:", err);
-            }
-        };
-
-        // Mulai auth saat script dimuat
-        initAuth();
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                // Daftarkan listener sinkronisasi data leaderboard setelah login sukses
-                setupFirebaseListeners();
-            }
-        });
-
-        // SIMPAN DATA LEADERBOARD & AKTIVITAS KE FIRESTORE (RULE 1)
-        async function syncPlayerDataToServer(status = "bermain", finalScore = 0) {
-            if (!currentUser) return;
-            try {
-                const cleanName = playerName.trim() || "Anonim";
-                
-                // Simpan/perbarui riwayat pengunjung publik
-                const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'players', currentUser.uid);
-                await setDoc(userDocRef, {
-                    name: cleanName,
-                    uid: currentUser.uid,
-                    status: status,
-                    lastActive: serverTimestamp(),
-                    score: status === "selesai" ? finalScore : score
-                }, { merge: true });
-
-            } catch (e) {
-                console.error("Error sinkronisasi data:", e);
-            }
-        }
-
-        // AMBIL & SINKRONKAN DATA LEADERBOARD DAN PENGUNJUNG SECARA LIVE (RULE 2 - NO COMPLEX QUERIES)
-        function setupFirebaseListeners() {
-            if (!currentUser) return;
-
-            const playersCollection = collection(db, 'artifacts', appId, 'public', 'data', 'players');
-            
-            // Menggunakan query sederhana tanpa orderBy/where yang butuh indeks rumit
-            onSnapshot(playersCollection, (snapshot) => {
-                const allPlayers = [];
-                snapshot.forEach(doc => {
-                    allPlayers.push(doc.data());
-                });
-
-                // Lakukan sorting dan penyaringan langsung di memori JavaScript (Aman & Sesuai Aturan)
-                // 1. Render Papan Peringkat (Urutkan dari Skor Tertinggi)
-                const sortedRank = [...allPlayers]
-                    .filter(p => p.score !== undefined)
-                    .sort((a, b) => b.score - a.score)
-                    .slice(0, 10); // Ambil 10 teratas
-
-                const leaderboardContainer = document.getElementById("leaderboard-list");
-                leaderboardContainer.innerHTML = "";
-                if (sortedRank.length === 0) {
-                    leaderboardContainer.innerHTML = `<p class="text-slate-500 text-center py-2">Belum ada skor tercatat.</p>`;
-                } else {
-                    sortedRank.forEach((player, idx) => {
-                        const rankMedal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}.`;
-                        const row = document.createElement("div");
-                        row.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg border border-slate-700/50";
-                        row.innerHTML = `
-                            <span class="font-bold flex items-center gap-2">
-                                <span class="text-amber-400 font-mono">${rankMedal}</span>
-                                <span class="${player.uid === currentUser.uid ? 'text-yellow-300 font-extrabold' : ''}">${player.name}</span>
-                            </span>
-                            <span class="font-bold text-emerald-400 font-mono">Rp${player.score.toLocaleString('id-ID')}</span>
-                        `;
-                        leaderboardContainer.appendChild(row);
-                    });
-                }
-
-                // 2. Render Siapa Saja Yang Sudah Masuk (Urutkan dari waktu aktivitas terbaru)
-                const sortedActive = [...allPlayers]
-                    .sort((a, b) => {
-                        const tA = a.lastActive?.seconds || 0;
-                        const tB = b.lastActive?.seconds || 0;
-                        return tB - tA;
-                    });
-
-                const activeContainer = document.getElementById("active-players-list");
-                activeContainer.innerHTML = "";
-                sortedActive.forEach(player => {
-                    const statusBadge = player.status === "selesai" ? 
-                        '<span class="bg-emerald-500/20 text-emerald-400 text-[8px] px-1.5 py-0.5 rounded font-bold">LULUS AUDIT</span>' : 
-                        '<span class="bg-yellow-500/20 text-yellow-400 text-[8px] px-1.5 py-0.5 rounded font-bold">ONLINE</span>';
-                    const row = document.createElement("div");
-                    row.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg border border-slate-700/50";
-                    row.innerHTML = `
-                        <div class="flex flex-col">
-                            <span class="font-bold text-slate-200">${player.name}</span>
-                            <span class="text-[8px] text-slate-500 font-mono">${player.uid}</span>
-                        </div>
-                        <div class="text-right">
-                            ${statusBadge}
-                        </div>
-                    `;
-                    activeContainer.appendChild(row);
-                });
-
-            }, (error) => {
-                console.error("Gagal memuat database real-time:", error);
-            });
-        }
-
-        // TATA SUARA SINTESIS (WEB AUDIO API)
+    <!-- SOUND & ENGINE ENGINE -->
+    <script>
+        // Web Audio API untuk efek suara instan
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(type) {
             try {
@@ -380,8 +247,153 @@
                 }
             } catch(e){}
         }
+    </script>
 
-        // CORE GAME ENGINE
+    <!-- FIREBASE INTEGRATION & GAMEPLAY SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Konfigurasi Database Firebase dengan proteksi anti-crash
+        let firebaseConfig = null;
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let firebaseEnabled = false;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'paud-audit-maze';
+
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                firebaseConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+            }
+            if (firebaseConfig && firebaseConfig.apiKey) {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                firebaseEnabled = true;
+            }
+        } catch (e) {
+            console.warn("Koneksi Firebase dinonaktifkan (Mode Offline diaktifkan otomatis):", e);
+        }
+
+        // TATA CARA AUTHENTICATION (RULE 3)
+        const initAuth = async () => {
+            if (!firebaseEnabled || !auth) return;
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Gagal melakukan login anonim:", err);
+            }
+        };
+
+        // Jalankan Autentikasi
+        initAuth();
+
+        if (auth) {
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    setupFirebaseListeners();
+                }
+            });
+        }
+
+        // Sinkronisasi data ke Firebase secara aman tanpa menyebabkan crash
+        window.syncPlayerDataToServer = async function(status = "bermain", finalScore = 0) {
+            if (!firebaseEnabled || !currentUser || !db) return;
+            try {
+                const cleanName = window.playerName.trim() || "Anonim";
+                const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'players', currentUser.uid);
+                await setDoc(userDocRef, {
+                    name: cleanName,
+                    uid: currentUser.uid,
+                    status: status,
+                    lastActive: serverTimestamp(),
+                    score: status === "selesai" ? finalScore : window.score
+                }, { merge: true });
+            } catch (e) {
+                console.error("Error sinkronisasi data:", e);
+            }
+        }
+
+        // Dengarkan pembaruan database secara real-time (Rule 2 - No Complex Queries)
+        function setupFirebaseListeners() {
+            if (!firebaseEnabled || !currentUser || !db) return;
+
+            const playersCollection = collection(db, 'artifacts', appId, 'public', 'data', 'players');
+            
+            onSnapshot(playersCollection, (snapshot) => {
+                const allPlayers = [];
+                snapshot.forEach(doc => {
+                    allPlayers.push(doc.data());
+                });
+
+                // Proses data di memori klien demi keamanan dan performa maksimal
+                const sortedRank = [...allPlayers]
+                    .filter(p => p.score !== undefined)
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 10);
+
+                const leaderboardContainer = document.getElementById("leaderboard-list");
+                leaderboardContainer.innerHTML = "";
+                if (sortedRank.length === 0) {
+                    leaderboardContainer.innerHTML = `<p class="text-slate-500 text-center py-2">Belum ada skor tercatat.</p>`;
+                } else {
+                    sortedRank.forEach((player, idx) => {
+                        const rankMedal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}.`;
+                        const row = document.createElement("div");
+                        row.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg border border-slate-700/50";
+                        row.innerHTML = `
+                            <span class="font-bold flex items-center gap-2">
+                                <span class="text-amber-400 font-mono">${rankMedal}</span>
+                                <span class="${player.uid === currentUser.uid ? 'text-yellow-300 font-extrabold' : ''}">${player.name}</span>
+                            </span>
+                            <span class="font-bold text-emerald-400 font-mono">Rp${player.score.toLocaleString('id-ID')}</span>
+                        `;
+                        leaderboardContainer.appendChild(row);
+                    });
+                }
+
+                const sortedActive = [...allPlayers]
+                    .sort((a, b) => {
+                        const tA = a.lastActive?.seconds || 0;
+                        const tB = b.lastActive?.seconds || 0;
+                        return tB - tA;
+                    });
+
+                const activeContainer = document.getElementById("active-players-list");
+                activeContainer.innerHTML = "";
+                sortedActive.forEach(player => {
+                    const statusBadge = player.status === "selesai" ? 
+                        '<span class="bg-emerald-500/20 text-emerald-400 text-[8px] px-1.5 py-0.5 rounded font-bold">LULUS AUDIT</span>' : 
+                        '<span class="bg-yellow-500/20 text-yellow-400 text-[8px] px-1.5 py-0.5 rounded font-bold">ONLINE</span>';
+                    const row = document.createElement("div");
+                    row.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg border border-slate-700/50";
+                    row.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="font-bold text-slate-200">${player.name}</span>
+                            <span class="text-[8px] text-slate-500 font-mono">${player.uid}</span>
+                        </div>
+                        <div class="text-right">
+                            ${statusBadge}
+                        </div>
+                    `;
+                    activeContainer.appendChild(row);
+                });
+            }, (error) => {
+                console.warn("Firestore Listener Error:", error);
+            });
+        }
+    </script>
+
+    <!-- CORE LOGIC PERMAINAN -->
+    <script>
+        // Data Kuis Utama
         const quizData = [
             { id: 1, question: "Tujuan utama akuntansi pada lembaga PAUD adalah ....", options: ["A. Menentukan kurikulum pembelajaran", "B. Mengelola dan menyajikan informasi keuangan secara sistematis", "C. Menambah jumlah peserta didik", "D. Menentukan jadwal kegiatan belajar"], answer: 1, explanation: "Tujuan utama akuntansi dalam organisasi nirlaba maupun PAUD adalah menyajikan informasi keuangan yang teratur, transparan, dan sistematis bagi pengambil keputusan." },
             { id: 2, question: "Salah satu manfaat akuntansi bagi lembaga PAUD adalah ....", options: ["A. Mengurangi jumlah tenaga pendidik", "B. Mempermudah pengelolaan dan pengawasan keuangan", "C. Menentukan metode pembelajaran anak", "D. Menambah jam operasional sekolah"], answer: 1, explanation: "Dengan akuntansi terstandar, pengelola dapat dengan mudah memantau arus masuk-keluar uang dan merencanakan anggaran yang sehat." },
@@ -422,13 +434,13 @@
 
         let currentMap = [];
         let gameActive = false, isPaused = false;
-        let score = 0, lives = 3, questionsAnswered = 0, correctAnswersCount = 0;
+        window.score = 0; window.playerName = "Akuntan PAUD";
+        let lives = 3, questionsAnswered = 0, correctAnswersCount = 0;
         let player = { x: 1, y: 1 }, books = [], currentQuizIndex = null;
         
-        // Atur 2 musuh dengan patroli warna dan pendaran masing-masing
         let enemies = [
-            { x: 5, y: 5, dirX: 1, dirY: 0, speedTimer: 0, icon: "👾", color: "#ef4444" }, // Merah (diubah ke titik aman 5,5)
-            { x: 11, y: 11, dirX: -1, dirY: 0, speedTimer: 0, icon: "📉", color: "#f97316" } // Oranye
+            { x: 5, y: 5, dirX: 1, dirY: 0, speedTimer: 0, icon: "👾", color: "#ef4444" },
+            { x: 11, y: 11, dirX: -1, dirY: 0, speedTimer: 0, icon: "📉", color: "#f97316" }
         ];
 
         const bookSpawnPositions = [
@@ -468,7 +480,9 @@
             resizeCanvas();
             gameLoop();
             
-            syncPlayerDataToServer("bermain");
+            if (window.syncPlayerDataToServer) {
+                window.syncPlayerDataToServer("bermain");
+            }
         }
 
         function updateUI() {
@@ -496,13 +510,12 @@
                 }
             }
 
-            // 2. Gambar Buku Aset (Buku Kas Biru) dengan pendaran neon biru
+            // 2. Gambar Buku Aset
             books.forEach(book => {
                 if (!book.collected) {
                     const bx = book.x * cellSize + cellSize/2;
                     const by = book.y * cellSize + cellSize/2;
                     
-                    // Pendaran Biru Neon
                     ctx.beginPath();
                     ctx.arc(bx, by, cellSize * 0.45, 0, Math.PI * 2);
                     ctx.fillStyle = "rgba(59, 130, 246, 0.25)";
@@ -514,12 +527,11 @@
                 }
             });
 
-            // 3. Gambar Musuh (Hantu Defisit/Utang) dengan pendaran warna masing-masing
+            // 3. Gambar Musuh
             enemies.forEach(enemy => {
                 const ex = enemy.x * cellSize + cellSize/2;
                 const ey = enemy.y * cellSize + cellSize/2;
 
-                // Pendaran warna musuh (Merah / Oranye)
                 ctx.beginPath();
                 ctx.arc(ex, ey, cellSize * 0.45, 0, Math.PI * 2);
                 ctx.fillStyle = enemy.color === "#ef4444" ? "rgba(239, 68, 68, 0.25)" : "rgba(249, 115, 22, 0.25)";
@@ -530,13 +542,13 @@
                 ctx.fillText(enemy.icon, ex, ey);
             });
 
-            // 4. Gambar Pemain (Ibu Guru) dengan pendaran emas/kuning
+            // 4. Gambar Pemain
             const px = player.x * cellSize + cellSize/2;
             const py = player.y * cellSize + cellSize/2;
             
             ctx.beginPath();
             ctx.arc(px, py, cellSize * 0.48, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(250, 204, 21, 0.3)"; // Emas menyala
+            ctx.fillStyle = "rgba(250, 204, 21, 0.3)";
             ctx.fill();
 
             ctx.font = `${cellSize * 0.65}px Arial`;
@@ -572,7 +584,9 @@
             lives--; score -= 500000;
             updateUI();
             player.x = 1; player.y = 1;
-            syncPlayerDataToServer("bermain");
+            if (window.syncPlayerDataToServer) {
+                window.syncPlayerDataToServer("bermain");
+            }
             if (lives <= 0) endGame(false);
         }
 
@@ -616,7 +630,7 @@
 
             quiz.options.forEach((opt, idx) => {
                 const btn = document.createElement("button");
-                btn.className = "w-full text-left p-2.5 rounded-xl border border-slate-200 font-semibold text-xs text-slate-700 transition flex items-center gap-2";
+                btn.className = "w-full text-left p-2.5 rounded-xl border border-slate-200 font-semibold text-xs text-slate-700 transition flex items-center gap-2 bg-white hover:bg-slate-50";
                 btn.innerHTML = `<span class="bg-slate-100 text-slate-600 text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">${String.fromCharCode(65 + idx)}</span> <span class="flex-1">${opt.substring(3)}</span>`;
                 btn.onclick = () => {
                     selectedOptionIndex = idx;
@@ -667,7 +681,9 @@
             }
             document.getElementById("feedback-explanation").innerHTML = `Pembahasan: ${quiz.explanation}`;
             questionsAnswered++; updateUI();
-            syncPlayerDataToServer("bermain");
+            if (window.syncPlayerDataToServer) {
+                window.syncPlayerDataToServer("bermain");
+            }
             document.getElementById("btn-next-adventure").classList.remove("hidden");
         };
 
@@ -688,10 +704,14 @@
             if (victory) {
                 document.getElementById("victory-accuracy").innerText = `Akurasi: ${Math.round((correctAnswersCount / 12) * 100)}% (${correctAnswersCount}/12 Benar)`;
                 document.getElementById("victory-overlay").classList.remove("hidden");
-                syncPlayerDataToServer("selesai", score);
+                if (window.syncPlayerDataToServer) {
+                    window.syncPlayerDataToServer("selesai", score);
+                }
             } else {
                 document.getElementById("gameover-overlay").classList.remove("hidden");
-                syncPlayerDataToServer("gagal", score);
+                if (window.syncPlayerDataToServer) {
+                    window.syncPlayerDataToServer("gagal", score);
+                }
             }
         }
 
@@ -701,11 +721,10 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // Mulai Game Setelah Mengatur Nama
+        // Mulai Game Setelah Mengatur Nama (Dibuat aman dari crash asinkronus)
         document.getElementById("btn-start").onclick = () => {
             const inputVal = document.getElementById("username-input").value.trim();
             if (inputVal === "") {
-                // Flash input as warning
                 const inp = document.getElementById("username-input");
                 inp.classList.add("border-rose-500", "animate-shake");
                 setTimeout(() => inp.classList.remove("border-rose-500", "animate-shake"), 500);
@@ -713,9 +732,13 @@
             }
             
             playerName = inputVal;
+            window.playerName = inputVal;
             document.getElementById("player-display-name").innerText = playerName;
 
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+            try {
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            } catch(e){}
+            
             resetGame();
         };
 
