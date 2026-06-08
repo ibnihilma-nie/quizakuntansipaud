@@ -189,10 +189,10 @@
                 <div>
                     <h3 class="text-xs font-bold text-amber-400 mb-2 border-b border-slate-800 pb-1 flex justify-between">
                         <span>🏅 KINERJA AUDIT TERBAIK</span>
-                        <span class="text-[9px] text-slate-500">Urut: Kas Tertinggi</span>
+                        <span class="text-[9px] text-slate-500" id="rank-type-badge">Mode Offline</span>
                     </h3>
                     <div id="leaderboard-list" class="space-y-1.5 max-h-[25vh] overflow-y-auto text-xs">
-                        <p class="text-slate-400 text-center py-2">Mode offline aktif / Memuat...</p>
+                        <p class="text-slate-400 text-center py-2">Memuat peringkat...</p>
                     </div>
                 </div>
 
@@ -200,10 +200,10 @@
                 <div>
                     <h3 class="text-xs font-bold text-emerald-400 mb-2 border-b border-slate-800 pb-1 flex justify-between">
                         <span>🟢 AKTIVITAS MASUK TERBARU</span>
-                        <span class="text-[9px] text-slate-500">Live Terdeteksi</span>
+                        <span class="text-[9px] text-slate-500">Aktivitas Sesi</span>
                     </h3>
                     <div id="active-players-list" class="space-y-1.5 max-h-[25vh] overflow-y-auto text-xs">
-                        <p class="text-slate-400 text-center py-2">Tidak ada aktivitas jaringan...</p>
+                        <p class="text-slate-400 text-center py-2">Memuat daftar...</p>
                     </div>
                 </div>
             </div>
@@ -298,6 +298,8 @@
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     currentUser = user;
+                    window.firebaseActive = true;
+                    document.getElementById("rank-type-badge").innerText = "Real-time Cloud";
                     setupFirebaseListeners();
                 }
             });
@@ -435,6 +437,8 @@
         let currentMap = [];
         let gameActive = false, isPaused = false;
         window.score = 0; window.playerName = "Akuntan PAUD";
+        window.firebaseActive = false; // Flag status firebase
+
         let lives = 3, questionsAnswered = 0, correctAnswersCount = 0;
         let player = { x: 1, y: 1 }, books = [], currentQuizIndex = null;
         
@@ -449,6 +453,99 @@
             { x: 3, y: 5 }, { x: 9, y: 5 }, { x: 3, y: 7 },
             { x: 9, y: 7 }, { x: 5, y: 11 }, { x: 11, y: 9 }
         ];
+
+        // LOGIKA PENYIMPANAN LOCAL LEADERBOARD (OFFLINE FALLBACK)
+        function saveLocalScore(name, finalScore, status) {
+            try {
+                let localData = localStorage.getItem("paud_leaderboard");
+                let players = localData ? JSON.parse(localData) : [
+                    { name: "Bunda Rini (PAUD Pembina)", score: 24000000, status: "selesai", date: "Baru saja" },
+                    { name: "PAUD Cahaya Hati", score: 20000000, status: "selesai", date: "1 jam lalu" },
+                    { name: "Siti Aminah", score: 16000000, status: "selesai", date: "2 jam lalu" },
+                    { name: "PAUD Melati", score: 12000000, status: "selesai", date: "1 hari lalu" }
+                ];
+
+                // Cek apakah pemain sudah ada di daftar lokal
+                let existingIndex = players.findIndex(p => p.name === name);
+                if (existingIndex !== -1) {
+                    if (finalScore > players[existingIndex].score) {
+                        players[existingIndex].score = finalScore;
+                        players[existingIndex].status = status;
+                    }
+                } else {
+                    players.push({
+                        name: name,
+                        score: finalScore,
+                        status: status,
+                        date: "Baru saja"
+                    });
+                }
+
+                // Urutkan berdasarkan skor tertinggi
+                players.sort((a, b) => b.score - a.score);
+                localStorage.setItem("paud_leaderboard", JSON.stringify(players));
+
+                if (!window.firebaseActive) {
+                    renderLocalLeaderboard(players);
+                }
+            } catch (e) {
+                console.warn("Gagal menulis ke LocalStorage:", e);
+            }
+        }
+
+        function renderLocalLeaderboard(players) {
+            const leaderboardContainer = document.getElementById("leaderboard-list");
+            leaderboardContainer.innerHTML = "";
+            
+            players.slice(0, 10).forEach((player, idx) => {
+                const rankMedal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}.`;
+                const row = document.createElement("div");
+                row.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg border border-slate-700/50";
+                row.innerHTML = `
+                    <span class="font-bold flex items-center gap-2">
+                        <span class="text-amber-400 font-mono">${rankMedal}</span>
+                        <span class="${player.name === window.playerName ? 'text-yellow-300 font-extrabold' : ''}">${player.name}</span>
+                    </span>
+                    <span class="font-bold text-emerald-400 font-mono">Rp${player.score.toLocaleString('id-ID')}</span>
+                `;
+                leaderboardContainer.appendChild(row);
+            });
+
+            const activeContainer = document.getElementById("active-players-list");
+            activeContainer.innerHTML = "";
+            players.forEach(player => {
+                const statusBadge = player.status === "selesai" ? 
+                    '<span class="bg-emerald-500/20 text-emerald-400 text-[8px] px-1.5 py-0.5 rounded font-bold">LULUS AUDIT</span>' : 
+                    '<span class="bg-yellow-500/20 text-yellow-400 text-[8px] px-1.5 py-0.5 rounded font-bold">ONLINE</span>';
+                const row = document.createElement("div");
+                row.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg border border-slate-700/50";
+                row.innerHTML = `
+                    <div class="flex flex-col">
+                        <span class="font-bold text-slate-200">${player.name}</span>
+                        <span class="text-[8px] text-slate-500 font-mono">${player.date || "Baru saja"}</span>
+                    </div>
+                    <div class="text-right">
+                        ${statusBadge}
+                    </div>
+                `;
+                activeContainer.appendChild(row);
+            });
+        }
+
+        window.loadLocalLeaderboard = function() {
+            try {
+                let localData = localStorage.getItem("paud_leaderboard");
+                let players = localData ? JSON.parse(localData) : [
+                    { name: "Bunda Rini (PAUD Pembina)", score: 24000000, status: "selesai", date: "Baru saja" },
+                    { name: "PAUD Cahaya Hati", score: 20000000, status: "selesai", date: "1 jam lalu" },
+                    { name: "Siti Aminah", score: 16000000, status: "selesai", date: "2 jam lalu" },
+                    { name: "PAUD Melati", score: 12000000, status: "selesai", date: "1 hari lalu" }
+                ];
+                if (!window.firebaseActive) {
+                    renderLocalLeaderboard(players);
+                }
+            } catch (e) {}
+        }
 
         function resizeCanvas() {
             const container = canvas.parentElement;
@@ -483,6 +580,7 @@
             if (window.syncPlayerDataToServer) {
                 window.syncPlayerDataToServer("bermain");
             }
+            saveLocalScore(window.playerName, score, "bermain");
         }
 
         function updateUI() {
@@ -587,6 +685,7 @@
             if (window.syncPlayerDataToServer) {
                 window.syncPlayerDataToServer("bermain");
             }
+            saveLocalScore(window.playerName, score, "bermain");
             if (lives <= 0) endGame(false);
         }
 
@@ -684,6 +783,7 @@
             if (window.syncPlayerDataToServer) {
                 window.syncPlayerDataToServer("bermain");
             }
+            saveLocalScore(window.playerName, score, "bermain");
             document.getElementById("btn-next-adventure").classList.remove("hidden");
         };
 
@@ -707,11 +807,13 @@
                 if (window.syncPlayerDataToServer) {
                     window.syncPlayerDataToServer("selesai", score);
                 }
+                saveLocalScore(window.playerName, score, "selesai");
             } else {
                 document.getElementById("gameover-overlay").classList.remove("hidden");
                 if (window.syncPlayerDataToServer) {
                     window.syncPlayerDataToServer("gagal", score);
                 }
+                saveLocalScore(window.playerName, score, "gagal");
             }
         }
 
@@ -773,6 +875,8 @@
             const modal = document.getElementById("rank-modal");
             const container = document.getElementById("rank-container");
             if (show) {
+                // Pastikan memuat data local terlebih dahulu sebagai cadangan instan
+                window.loadLocalLeaderboard();
                 modal.classList.remove("hidden");
                 setTimeout(() => container.classList.remove("scale-95", "opacity-0"), 50);
             } else {
@@ -785,7 +889,10 @@
             window.toggleRankModal(true);
         };
 
-        window.onload = resizeCanvas;
+        window.onload = function() {
+            resizeCanvas();
+            window.loadLocalLeaderboard(); // Inisialisasi data leaderboard
+        };
         window.resetGame = resetGame;
     </script>
 </body>
