@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Petualangan Akuntansi PAUD</title>
+    <title>Petualangan Akuntansi PDM & PT</title>
     <!-- Tailwind CSS untuk Tata Letak Modern -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Menarik -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght=600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Quicksand', sans-serif;
@@ -36,7 +36,7 @@
             <div class="flex items-center gap-2">
                 <span class="text-2xl">🏫</span>
                 <div>
-                    <h1 class="title-font text-xs sm:text-sm text-yellow-400 tracking-wide leading-none" id="player-display-name">Akuntan PAUD</h1>
+                    <h1 class="title-font text-xs sm:text-sm text-yellow-400 tracking-wide leading-none" id="player-display-name">Akuntan Akademik</h1>
                     <span id="progress-val" class="text-[10px] text-purple-300 font-bold">Buku: 0 / 12</span>
                 </div>
             </div>
@@ -63,10 +63,10 @@
 
             <!-- OVERLAY: REGISTRASI NAMA (START SCREEN) -->
             <div id="start-overlay" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-20">
-                <span class="text-5xl mb-2 animate-bounce">🧑‍🏫</span>
-                <h2 class="title-font text-xl text-yellow-400 mb-1">Petualangan Akuntansi PAUD</h2>
+                <span class="text-5xl mb-2 animate-bounce">🎓</span>
+                <h2 class="title-font text-xl text-yellow-400 mb-1">Akuntansi Sekolah & Kampus</h2>
                 <p class="text-slate-400 text-[11px] max-w-xs mb-4 leading-relaxed">
-                    Kumpulkan <span class="text-blue-400 font-bold">12 Buku Kas (📘)</span>. Hindari hantu <span class="text-red-400 font-bold">Defisit (👾)</span>! Selesaikan kuis untuk surplus finansial.
+                    Kumpulkan <span class="text-blue-400 font-bold">12 Buku Kas (📘)</span>. Hindari hantu <span class="text-red-400 font-bold">Defisit (👾)</span>! Selesaikan audit kuis untuk surplus finansial institusi.
                 </p>
                 
                 <!-- Input Nama Kustom -->
@@ -84,7 +84,7 @@
             <div id="gameover-overlay" class="absolute inset-0 bg-slate-950/95 hidden flex flex-col items-center justify-center p-6 text-center z-20">
                 <span class="text-5xl mb-2">📉</span>
                 <h2 class="title-font text-xl text-red-500 mb-1">Kas Mengalami Defisit!</h2>
-                <p class="text-slate-400 text-xs max-w-xs mb-4">Anda terlalu banyak terkena kendala atau salah menjawab audit keuangan.</p>
+                <p class="text-slate-400 text-xs max-w-xs mb-4">Anda terlalu banyak terkena kendala atau salah menjawab audit keuangan akademik.</p>
                 <div class="bg-slate-900 border border-slate-800 p-2.5 rounded-lg mb-5 w-48 mx-auto">
                     <p class="text-[10px] text-slate-500 font-bold">SALDO AKHIR KAS:</p>
                     <p id="gameover-final-score" class="text-sm font-bold text-red-400">Rp0</p>
@@ -98,7 +98,7 @@
             <div id="victory-overlay" class="absolute inset-0 bg-slate-950/95 hidden flex flex-col items-center justify-center p-6 text-center z-20">
                 <span class="text-5xl mb-2">🏆</span>
                 <h2 class="title-font text-xl text-yellow-400 mb-1">Audit Sukses & Surplus!</h2>
-                <p class="text-slate-400 text-xs max-w-xs mb-4">Luar biasa! Laporan keuangan PAUD berhasil diaudit secara transparan.</p>
+                <p class="text-slate-400 text-xs max-w-xs mb-4">Luar biasa! Laporan keuangan sekolah dan universitas berhasil diaudit secara transparan.</p>
                 <div class="bg-slate-900 border border-yellow-500/20 px-4 py-3 rounded-xl mb-5 w-56 mx-auto">
                     <p class="text-[10px] text-slate-500 font-bold">TOTAL SALDO SURPLUS:</p>
                     <p id="victory-final-score" class="text-base font-bold text-emerald-400">Rp0</p>
@@ -143,7 +143,7 @@
             
             <div class="bg-slate-900 text-white px-4 py-3 flex justify-between items-center border-b border-slate-800">
                 <span class="title-font text-xs tracking-wider flex items-center gap-1.5 text-yellow-400">
-                    📘 AUDIT INTERNAL PAUD
+                    📘 AUDIT INTERNAL AKADEMIK
                 </span>
                 <span id="quiz-number-tag" class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded-full font-bold">SOAL 1/12</span>
             </div>
@@ -189,10 +189,10 @@
                 <div>
                     <h3 class="text-xs font-bold text-amber-400 mb-2 border-b border-slate-800 pb-1 flex justify-between">
                         <span>🏅 KINERJA AUDIT TERBAIK</span>
-                        <span class="text-[9px] text-slate-500">Urut: Kas Tertinggi</span>
+                        <span class="text-[9px] text-slate-500" id="rank-type-badge">Mode Offline</span>
                     </h3>
                     <div id="leaderboard-list" class="space-y-1.5 max-h-[25vh] overflow-y-auto text-xs">
-                        <p class="text-slate-400 text-center py-2">Mode offline aktif / Memuat...</p>
+                        <p class="text-slate-400 text-center py-2">Memuat peringkat...</p>
                     </div>
                 </div>
 
@@ -200,10 +200,10 @@
                 <div>
                     <h3 class="text-xs font-bold text-emerald-400 mb-2 border-b border-slate-800 pb-1 flex justify-between">
                         <span>🟢 AKTIVITAS MASUK TERBARU</span>
-                        <span class="text-[9px] text-slate-500">Live Terdeteksi</span>
+                        <span class="text-[9px] text-slate-500">Aktivitas Sesi</span>
                     </h3>
                     <div id="active-players-list" class="space-y-1.5 max-h-[25vh] overflow-y-auto text-xs">
-                        <p class="text-slate-400 text-center py-2">Tidak ada aktivitas jaringan...</p>
+                        <p class="text-slate-400 text-center py-2">Memuat daftar...</p>
                     </div>
                 </div>
             </div>
@@ -298,6 +298,8 @@
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     currentUser = user;
+                    window.firebaseActive = true;
+                    document.getElementById("rank-type-badge").innerText = "Real-time Cloud";
                     setupFirebaseListeners();
                 }
             });
@@ -393,20 +395,92 @@
 
     <!-- CORE LOGIC PERMAINAN -->
     <script>
-        // Data Kuis Utama
+        // Data Kuis Baru: Akuntansi Pendidikan Dasar dan Menengah (PDM) & Perguruan Tinggi (PT)
         const quizData = [
-            { id: 1, question: "Tujuan utama akuntansi pada lembaga PAUD adalah ....", options: ["A. Menentukan kurikulum pembelajaran", "B. Mengelola dan menyajikan informasi keuangan secara sistematis", "C. Menambah jumlah peserta didik", "D. Menentukan jadwal kegiatan belajar"], answer: 1, explanation: "Tujuan utama akuntansi dalam organisasi nirlaba maupun PAUD adalah menyajikan informasi keuangan yang teratur, transparan, dan sistematis bagi pengambil keputusan." },
-            { id: 2, question: "Salah satu manfaat akuntansi bagi lembaga PAUD adalah ....", options: ["A. Mengurangi jumlah tenaga pendidik", "B. Mempermudah pengelolaan dan pengawasan keuangan", "C. Menentukan metode pembelajaran anak", "D. Menambah jam operasional sekolah"], answer: 1, explanation: "Dengan akuntansi terstandar, pengelola dapat dengan mudah memantau arus masuk-keluar uang dan merencanakan anggaran yang sehat." },
-            { id: 3, question: "Laporan keuangan yang menunjukkan posisi aset, kewajiban, dan modal suatu lembaga disebut ....", options: ["A. Laporan Arus Kas", "B. Laporan Perubahan Modal", "C. Neraca", "D. Jurnal Umum"], answer: 2, explanation: "Neraca (Balance Sheet) menyajikan ringkasan posisi harta (aset), utang (kewajiban), dan modal bersih milik PAUD pada tanggal tertentu." },
-            { id: 4, question: "Pencatatan seluruh transaksi keuangan secara kronologis dilakukan dalam ....", options: ["A. Buku Besar", "B. Jurnal", "C. Neraca Saldo", "D. Laporan Keuangan"], answer: 1, explanation: "Jurnal adalah tempat pencatatan transaksi keuangan pertama kali secara runtut waktu (kronologis) sebelum diposting ke Buku Besar." },
-            { id: 5, question: "Dana SPP yang diterima oleh PAUD termasuk dalam kategori ....", options: ["A. Beban", "B. Utang", "C. Pendapatan", "D. Modal"], answer: 2, explanation: "Penerimaan rutin dari SPP siswa diakui langsung sebagai Pendapatan Operasional PAUD." },
-            { id: 6, question: "Pembelian alat permainan edukatif (APE) untuk kegiatan belajar termasuk ....", options: ["A. Pendapatan", "B. Pengeluaran/Beban", "C. Modal tambahan", "D. Piutang"], answer: 1, explanation: "Pembelian APE habis pakai atau penyusutan nilai APE jangka panjang dicatat sebagai beban pengeluaran operasional pendidikan." },
-            { id: 7, question: "Analisis laporan keuangan pada PAUD bertujuan untuk ....", options: ["A. Menentukan nilai rapor siswa", "B. Mengetahui kondisi dan kinerja keuangan lembaga", "C. Menambah jumlah kelas", "D. Menentukan jadwal guru"], answer: 1, explanation: "Analisis membantu yayasan atau kepala sekolah mendeteksi apakah lembaga mengalami surplus/defisit serta seberapa efisien pengeluaran dilakukan." },
-            { id: 8, question: "Prinsip transparansi dalam akuntansi PAUD berarti ....", options: ["A. Menyembunyikan data keuangan dari pihak tertentu", "B. Menyampaikan informasi keuangan secara terbuka dan dapat dipertanggungjawabkan", "C. Menghapus transaksi yang tidak penting", "D. Menambah anggaran setiap tahun"], answer: 1, explanation: "Transparansi berarti semua donasi, dana BOS/BOP, dan SPP dilaporkan apa adanya kepada komite sekolah, yayasan, maupun dinas pendidikan secara terbuka." },
-            { id: 9, question: "Jika total pendapatan PAUD lebih besar daripada total pengeluaran, maka kondisi keuangan lembaga mengalami ....", options: ["A. Defisit", "B. Kerugian", "C. Surplus", "D. Piutang"], answer: 2, explanation: "Kelebihan pendapatan atas biaya operasional dalam entitas nirlaba (seperti PAUD) diistilahkan sebagai 'Surplus'." },
-            { id: 10, question: "Berikut yang termasuk pengguna informasi laporan keuangan PAUD adalah ....", options: ["A. Kepala sekolah dan yayasan", "B. Orang tua dan pihak terkait", "C. Pemerintah atau pemberi bantuan dana", "D. Semua jawaban benar"], answer: 3, explanation: "Semua pihak tersebut berkepentingan dalam memantau transparansi operasional maupun akuntabilitas dana hibah." },
-            { id: 11, question: "Sebuah PAUD memperoleh pendapatan selama bulan Mei sebesar:<br>• SPP siswa = Rp5.000.000<br>• Bantuan pemerintah = Rp2.000.000<br><br>Sedangkan pengeluarannya:<br>• Gaji guru = Rp4.000.000<br>• Pembelian alat tulis = Rp500.000<br>• Biaya listrik dan air = Rp300.000<br><br>Berapakah surplus atau defisit yang diperoleh PAUD tersebut?", options: ["A. Surplus Rp1.200.000", "B. Surplus Rp2.200.000", "C. Defisit Rp1.200.000", "D. Defisit Rp2.200.000"], answer: 1, explanation: "Total Pendapatan = Rp7.000.000. Total Pengeluaran = Rp4.800.000. Surplus = Rp7.000.000 - Rp4.800.000 = <strong>Rp2.200.000 (Surplus)</strong>." },
-            { id: 12, question: "Pada awal bulan, kas PAUD sebesar Rp3.000.000.<br>Selama bulan tersebut terjadi transaksi:<br>• Menerima pembayaran SPP = Rp4.500.000<br>• Membayar gaji guru = Rp2.500.000<br>• Membeli alat permainan edukatif = Rp1.000.000<br><br>Berapakah saldo kas akhir PAUD?", options: ["A. Rp3.000.000", "B. Rp4.000.000", "C. Rp4.500.000", "D. Rp5.000.000"], answer: 1, explanation: "Saldo Akhir = Saldo Awal (Rp3.000.000) + SPP (Rp4.500.000) - Gaji (Rp2.500.000) - APE (Rp1.000.000) = <strong>Rp4.000.000</strong>." }
+            { 
+                id: 1, 
+                question: "Sumber pendanaan utama dari pemerintah yang dialokasikan khusus untuk biaya operasional non-personalia pada jenjang Pendidikan Dasar dan Menengah (PDM) adalah ....", 
+                options: ["A. Bantuan Operasional Sekolah (BOS / BOP)", "B. Uang Kuliah Tunggal (UKT)", "C. Dana Alokasi Khusus (DAK) Fisik", "D. Sumbangan Pembinaan Pendidikan (SPP)"], 
+                answer: 0, 
+                explanation: "Bantuan Operasional Sekolah (BOS/BOP) adalah program pemerintah untuk penyediaan pendanaan biaya operasional non-personalia bagi satuan pendidikan dasar dan menengah." 
+            },
+            { 
+                id: 2, 
+                question: "Pelaporan keuangan entitas nirlaba, termasuk yayasan yang mengelola sekolah PDM atau perguruan tinggi swasta di Indonesia saat ini mengacu pada standar ....", 
+                options: ["A. Standar Akuntansi Keuangan Syariah (SAK Syariah)", "B. Pernyataan Standar Akuntansi Keuangan 45 (PSAK 45)", "C. ISAK 35 (Interpretasi Standar Akuntansi Keuangan 35)", "D. SAP (Standar Akuntansi Pemerintahan) Berbasis Akrual"], 
+                answer: 2, 
+                explanation: "Sejak tahun 2020, pelaporan keuangan organisasi non-laba (termasuk lembaga pendidikan swasta) diatur di bawah ISAK 35 yang menggantikan PSAK 45." 
+            },
+            { 
+                id: 3, 
+                question: "Dokumen komprehensif yang berisi rencana pendapatan anggaran serta rincian kegiatan belanja operasional sekolah PDM selama periode satu tahun disebut ....", 
+                options: ["A. Daftar Isian Pelaksanaan Anggaran (DIPA)", "B. Rencana Kerja dan Anggaran Sekolah (RKAS / RAPBS)", "C. Rencana Kerja Jangka Menengah (RKJM)", "D. Laporan Realisasi Anggaran (LRA)"], 
+                answer: 1, 
+                explanation: "RAPBS/RKAS adalah rencana kerja tahunan sekolah yang merinci perkiraan penerimaan dana serta pengeluaran yang terstruktur dan sah." 
+            },
+            { 
+                id: 4, 
+                question: "Sistem pengenaan tarif biaya pendidikan semesteran pada Perguruan Tinggi Negeri (PTN) yang disesuaikan berdasarkan kemampuan ekonomi orang tua mahasiswa dikenal dengan istilah ....", 
+                options: ["A. Sumbangan Pengembangan Institusi (SPI)", "B. Uang Kuliah Tunggal (UKT)", "C. Biaya Operasional Kuliah Swadaya", "D. Dana Sumbangan Pendidikan Tetap"], 
+                answer: 1, 
+                explanation: "Uang Kuliah Tunggal (UKT) merupakan sebagian biaya kuliah tunggal yang ditanggung oleh setiap mahasiswa berdasarkan kelompok kemampuan ekonomi orang tua." 
+            },
+            { 
+                id: 5, 
+                question: "Pengeluaran kas perguruan tinggi untuk membangun laboratorium canggih atau pembelian bus kampus diakui dalam pencatatan akuntansi sebagai ....", 
+                options: ["A. Beban operasional umum langsung", "B. Aset Tetap (Belanja Modal)", "C. Utang jangka panjang tertunda", "D. Pendapatan jasa pendidikan akrual"], 
+                answer: 1, 
+                explanation: "Pengeluaran untuk memperoleh aset dengan masa manfaat lebih dari satu tahun dicatat sebagai Aset Tetap (Capital Expenditure) dan akan didepresiasikan berkala." 
+            },
+            { 
+                id: 6, 
+                question: "Perguruan Tinggi Negeri Badan Hukum (PTN-BH) memiliki fleksibilitas otonomi keuangan penuh, sehingga standar laporan keuangannya wajib disusun menggunakan ....", 
+                options: ["A. Standar Akuntansi Keuangan (SAK) Umum / Sektor Swasta", "B. Standar Akuntansi Pemerintahan (SAP) secara murni", "C. Standar Pelaporan Keuangan Militer Terpadu", "D. Peraturan Keuangan Pemerintah Daerah setempat"], 
+                answer: 0, 
+                explanation: "PTN-BH bertindak sebagai subjek hukum mandiri nirlaba dan wajib menggunakan Standar Akuntansi Keuangan (SAK) komersial yang berlaku umum di Indonesia." 
+            },
+            { 
+                id: 7, 
+                question: "Dana dari donatur atau alumni Perguruan Tinggi yang pokoknya wajib diinvestasikan selamanya dan hanya hasil investasinya yang boleh digunakan untuk operasional kampus dinamakan ....", 
+                options: ["A. Dana Hibah Jangka Pendek", "B. Modal Kerja Likuid", "C. Dana Abadi (Endowment Fund)", "D. Utang Obligasi Pendidikan"], 
+                answer: 2, 
+                explanation: "Dana Abadi (Endowment Fund) adalah instrumen keuangan penting di universitas, di mana dana pokok dijaga ketat agar terus berkembang lewat investasi aman." 
+            },
+            { 
+                id: 8, 
+                question: "Kewajiban lembaga sekolah PDM dan Perguruan Tinggi dalam menyajikan laporan realisasi anggaran belanja BOS atau APBN secara jujur dan terbuka merupakan perwujudan dari ....", 
+                options: ["A. Prinsip Konsistensi Fiskal", "B. Prinsip Akuntabilitas dan Transparansi", "C. Prinsip Kelangsungan Usaha", "D. Prinsip Penandingan Biaya Historis"], 
+                answer: 1, 
+                explanation: "Transparansi dan akuntabilitas menjamin dana publik yang dikelola institusi pendidikan dipertanggungjawabkan dengan benar kepada masyarakat dan pemerintah." 
+            },
+            { 
+                id: 9, 
+                question: "Alokasi dana BOS yang diberikan khusus kepada sekolah berprestasi atau sekolah yang menjadi pelaksana program transformasi digital (Sekolah Penggerak) disebut ....", 
+                options: ["A. BOS Reguler Swasta", "B. BOS Afirmasi Khusus", "C. BOS Kinerja", "D. BOP Kesetaraan Khusus"], 
+                answer: 2, 
+                explanation: "BOS Kinerja dialokasikan untuk sekolah yang dinilai berkinerja baik dalam mutu hasil belajar, transformasi digital, maupun program Sekolah Penggerak." 
+            },
+            { 
+                id: 10, 
+                question: "Penurunan manfaat ekonomis dari gedung sekolah, komputer praktik, dan bus universitas seiring waktu harus dicatat dalam akuntansi sebagai ....", 
+                options: ["A. Piutang pendidikan bermasalah", "B. Estimasi liabilitas kontinjensi", "C. Pendapatan ditangguhkan", "D. Beban Penyusutan (Depresiasi)"], 
+                answer: 3, 
+                explanation: "Beban Penyusutan (Depresiasi) mencatat alokasi sistematis jumlah yang dapat disusutkan dari suatu aset tetap selama masa manfaatnya." 
+            },
+            { 
+                id: 11, 
+                question: "SMA Swasta 'Maju Jaya' memperoleh pendapatan selama semester ganjil:<br>• SPP siswa = Rp120.000.000<br>• Dana BOS = Rp30.000.000<br><br>Beban pengeluaran:<br>• Gaji guru/staf = Rp90.000.000<br>• Operasional belajar = Rp40.000.000<br>• Perawatan bangunan = Rp10.000.000<br><br>Berapakah surplus/defisit laporan keuangan SMA tersebut?", 
+                options: ["A. Surplus Rp10.000.000", "B. Surplus Rp20.000.000", "C. Defisit Rp10.000.000", "D. Defisit Rp20.000.000"], 
+                answer: 0, 
+                explanation: "Total Pendapatan = Rp150.000.000 (SPP + BOS). Total Pengeluaran = Rp140.000.000. Hasil = Rp150.000.000 - Rp140.000.000 = <strong>Surplus Rp10.000.000</strong>." 
+            },
+            { 
+                id: 12, 
+                question: "Pada awal tahun, sebuah SMP memiliki Sisa Lebih Perhitungan Anggaran (SILPA) Dana BOS sebesar Rp5.000.000.<br>Tahun ini sekolah menerima transfer BOS sebesar Rp85.000.000 dan merealisasikan belanja sebesar Rp82.000.000.<br>Berapakah saldo sisa akhir dana BOS yang dimiliki sekolah tersebut?", 
+                options: ["A. Rp3.000.000", "B. Rp5.000.000", "C. Rp8.000.000", "D. Rp10.000.000"], 
+                answer: 2, 
+                explanation: "Saldo Sisa Akhir = Saldo Awal (Rp5.000.000) + Penerimaan Baru (Rp85.000.000) - Belanja Terealisasi (Rp82.000.000) = <strong>Rp8.000.000</strong>." 
+            }
         ];
 
         const canvas = document.getElementById("gameCanvas");
@@ -435,6 +509,8 @@
         let currentMap = [];
         let gameActive = false, isPaused = false;
         window.score = 0; window.playerName = "Akuntan PAUD";
+        window.firebaseActive = false; // Flag status firebase
+
         let lives = 3, questionsAnswered = 0, correctAnswersCount = 0;
         let player = { x: 1, y: 1 }, books = [], currentQuizIndex = null;
         
@@ -449,6 +525,99 @@
             { x: 3, y: 5 }, { x: 9, y: 5 }, { x: 3, y: 7 },
             { x: 9, y: 7 }, { x: 5, y: 11 }, { x: 11, y: 9 }
         ];
+
+        // LOGIKA PENYIMPANAN LOCAL LEADERBOARD (OFFLINE FALLBACK)
+        function saveLocalScore(name, finalScore, status) {
+            try {
+                let localData = localStorage.getItem("paud_leaderboard");
+                let players = localData ? JSON.parse(localData) : [
+                    { name: "Bunda Rini (PAUD Pembina)", score: 24000000, status: "selesai", date: "Baru saja" },
+                    { name: "PAUD Cahaya Hati", score: 20000000, status: "selesai", date: "1 jam lalu" },
+                    { name: "Siti Aminah", score: 16000000, status: "selesai", date: "2 jam lalu" },
+                    { name: "PAUD Melati", score: 12000000, status: "selesai", date: "1 hari lalu" }
+                ];
+
+                // Cek apakah pemain sudah ada di daftar lokal
+                let existingIndex = players.findIndex(p => p.name === name);
+                if (existingIndex !== -1) {
+                    if (finalScore > players[existingIndex].score) {
+                        players[existingIndex].score = finalScore;
+                        players[existingIndex].status = status;
+                    }
+                } else {
+                    players.push({
+                        name: name,
+                        score: finalScore,
+                        status: status,
+                        date: "Baru saja"
+                    });
+                }
+
+                // Urutkan berdasarkan skor tertinggi
+                players.sort((a, b) => b.score - a.score);
+                localStorage.setItem("paud_leaderboard", JSON.stringify(players));
+
+                if (!window.firebaseActive) {
+                    renderLocalLeaderboard(players);
+                }
+            } catch (e) {
+                console.warn("Gagal menulis ke LocalStorage:", e);
+            }
+        }
+
+        function renderLocalLeaderboard(players) {
+            const leaderboardContainer = document.getElementById("leaderboard-list");
+            leaderboardContainer.innerHTML = "";
+            
+            players.slice(0, 10).forEach((player, idx) => {
+                const rankMedal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}.`;
+                const row = document.createElement("div");
+                row.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg border border-slate-700/50";
+                row.innerHTML = `
+                    <span class="font-bold flex items-center gap-2">
+                        <span class="text-amber-400 font-mono">${rankMedal}</span>
+                        <span class="${player.name === window.playerName ? 'text-yellow-300 font-extrabold' : ''}">${player.name}</span>
+                    </span>
+                    <span class="font-bold text-emerald-400 font-mono">Rp${player.score.toLocaleString('id-ID')}</span>
+                `;
+                leaderboardContainer.appendChild(row);
+            });
+
+            const activeContainer = document.getElementById("active-players-list");
+            activeContainer.innerHTML = "";
+            players.forEach(player => {
+                const statusBadge = player.status === "selesai" ? 
+                    '<span class="bg-emerald-500/20 text-emerald-400 text-[8px] px-1.5 py-0.5 rounded font-bold">LULUS AUDIT</span>' : 
+                    '<span class="bg-yellow-500/20 text-yellow-400 text-[8px] px-1.5 py-0.5 rounded font-bold">ONLINE</span>';
+                const row = document.createElement("div");
+                row.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg border border-slate-700/50";
+                row.innerHTML = `
+                    <div class="flex flex-col">
+                        <span class="font-bold text-slate-200">${player.name}</span>
+                        <span class="text-[8px] text-slate-500 font-mono">${player.date || "Baru saja"}</span>
+                    </div>
+                    <div class="text-right">
+                        ${statusBadge}
+                    </div>
+                `;
+                activeContainer.appendChild(row);
+            });
+        }
+
+        window.loadLocalLeaderboard = function() {
+            try {
+                let localData = localStorage.getItem("paud_leaderboard");
+                let players = localData ? JSON.parse(localData) : [
+                    { name: "Bunda Rini (PAUD Pembina)", score: 24000000, status: "selesai", date: "Baru saja" },
+                    { name: "PAUD Cahaya Hati", score: 20000000, status: "selesai", date: "1 jam lalu" },
+                    { name: "Siti Aminah", score: 16000000, status: "selesai", date: "2 jam lalu" },
+                    { name: "PAUD Melati", score: 12000000, status: "selesai", date: "1 hari lalu" }
+                ];
+                if (!window.firebaseActive) {
+                    renderLocalLeaderboard(players);
+                }
+            } catch (e) {}
+        }
 
         function resizeCanvas() {
             const container = canvas.parentElement;
@@ -483,6 +652,7 @@
             if (window.syncPlayerDataToServer) {
                 window.syncPlayerDataToServer("bermain");
             }
+            saveLocalScore(window.playerName, score, "bermain");
         }
 
         function updateUI() {
@@ -587,6 +757,7 @@
             if (window.syncPlayerDataToServer) {
                 window.syncPlayerDataToServer("bermain");
             }
+            saveLocalScore(window.playerName, score, "bermain");
             if (lives <= 0) endGame(false);
         }
 
@@ -684,6 +855,7 @@
             if (window.syncPlayerDataToServer) {
                 window.syncPlayerDataToServer("bermain");
             }
+            saveLocalScore(window.playerName, score, "bermain");
             document.getElementById("btn-next-adventure").classList.remove("hidden");
         };
 
@@ -707,11 +879,13 @@
                 if (window.syncPlayerDataToServer) {
                     window.syncPlayerDataToServer("selesai", score);
                 }
+                saveLocalScore(window.playerName, score, "selesai");
             } else {
                 document.getElementById("gameover-overlay").classList.remove("hidden");
                 if (window.syncPlayerDataToServer) {
                     window.syncPlayerDataToServer("gagal", score);
                 }
+                saveLocalScore(window.playerName, score, "gagal");
             }
         }
 
@@ -721,7 +895,7 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // Mulai Game Setelah Mengatur Nama (Dibuat aman dari crash asinkronus)
+        // Mulai Game Setelah Mengatur Nama
         document.getElementById("btn-start").onclick = () => {
             const inputVal = document.getElementById("username-input").value.trim();
             if (inputVal === "") {
@@ -773,6 +947,8 @@
             const modal = document.getElementById("rank-modal");
             const container = document.getElementById("rank-container");
             if (show) {
+                // Pastikan memuat data local terlebih dahulu sebagai cadangan instan
+                window.loadLocalLeaderboard();
                 modal.classList.remove("hidden");
                 setTimeout(() => container.classList.remove("scale-95", "opacity-0"), 50);
             } else {
@@ -785,7 +961,10 @@
             window.toggleRankModal(true);
         };
 
-        window.onload = resizeCanvas;
+        window.onload = function() {
+            resizeCanvas();
+            window.loadLocalLeaderboard(); // Inisialisasi data leaderboard
+        };
         window.resetGame = resetGame;
     </script>
 </body>
